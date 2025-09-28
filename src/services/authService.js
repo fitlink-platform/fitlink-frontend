@@ -1,10 +1,20 @@
 import axios from '../api/axiosClient';
-import { setToken, removeToken } from '../auth/token';
+
+export const loginWithGoogle = async (idToken) => {
+  try {
+    // cookie được set bởi backend, frontend không cần lưu token
+    const res = await axios.post('/auth/google', { idToken });
+    return res.data; // chỉ cần user
+  } catch (error) {
+    console.error('Google login failed:', error);
+    throw error;
+  }
+};
 
 export const login = async (phone, password) => {
     try {
         const res = await axios.post('/auth/login', { phone, password });
-        setToken(res.data.accessToken);
+        // setToken(res.data.accessToken);
         return res.data;
     } catch (error) {
         console.error('Login failed:', error); // xử lý lỗi cụ thể
@@ -16,7 +26,7 @@ export const login = async (phone, password) => {
 export const registerByPhone = async (name, phone, password, email) => {
     try {
         const res = await axios.post('/auth/register', { phone, password, name, email });
-        setToken(res.data.accessToken);
+        // setToken(res.data.accessToken);
         return res.data;
     } catch (error) {
         console.error('Register failed:', error); // xử lý lỗi cụ thể

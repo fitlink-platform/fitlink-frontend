@@ -7,6 +7,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "~/contexts/AuthProvider";
 import { getProfile } from "~/services/userService";
 import { toast } from "react-toastify";
+import { GoogleLogin } from "@react-oauth/google";
+import { loginWithGoogle } from "~/services/authService";
 
 const schema = yup.object().shape({
   phone: yup
@@ -43,6 +45,27 @@ export default function LoginPage() {
       toast.error(err?.response?.data?.message || "Đăng nhập thất bại");
     }
   };
+
+  const handleSuccess = async (credentialResponse) => {
+    try {
+      const idToken = credentialResponse.credential;
+      const data = await loginWithGoogle(idToken);
+
+      setUser(data.user); // user lấy từ backend
+      toast.success("Đăng nhập Google thành công!");
+
+      if (data.user.role === "admin") navigate("/admin");
+      else navigate("/");
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Đăng nhập Google thất bại");
+    }
+  };
+
+
+  const handleError = () => {
+    toast.error("Login Failed")
+
+  }
 
   return (
     <div className="min-h-screen bg-[#0f2a27] text-white">
@@ -156,7 +179,7 @@ export default function LoginPage() {
                 <div className="h-px flex-1 bg-gray-200" />
               </div>
 
-              <button
+              {/* <button
                 type="button"
                 onClick={() => console.log("TODO: Google login")}
                 className="w-full inline-flex items-center justify-center gap-3 rounded-lg border border-gray-300 bg-white py-3 font-medium text-gray-700 hover:bg-gray-50"
@@ -167,7 +190,12 @@ export default function LoginPage() {
                   className="w-5 h-5"
                 />
                 Continue with Google
-              </button>
+              </button> */}
+
+              <GoogleLogin
+                onSuccess={handleSuccess}
+                onError={handleError}
+              />
 
               <p className="text-center text-sm text-gray-600">
                 Don’t have an account?{" "}
