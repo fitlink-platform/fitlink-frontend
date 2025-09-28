@@ -12,6 +12,8 @@ import UnauthorizedPage from "~/pages/UnauthorizedPage";
 import ProductDetailPage from "~/pages/customer/ProductDetailPage";
 import OrderPage from "~/pages/customer/OrderPage";
 import OrderSuccess from "~/pages/customer/OrderSuccess";
+import OrderDetail from "~/pages/customer/OrderDetail";
+import OrderHistoryPage from "~/pages/customer/OrderHistoryPage";
 {
   /* admin */
 }
@@ -41,6 +43,23 @@ export default function AppRouter() {
           </PrivateRoute>
         }
       />
+          <Route
+        path="/customer/orders"
+        element={
+          <PrivateRoute allowedRoles={["customer"]}>
+            <OrderHistoryPage />
+          </PrivateRoute>
+        }
+      />
+           <Route
+        path="/customer/orders/:id"
+        element={
+          <PrivateRoute allowedRoles={["customer"]}>
+            <OrderDetail />
+          </PrivateRoute>
+        }
+      />
+
       <Route path="/products/:id" element={<ProductDetailPage />} />
       <Route path="/order" element={<OrderPage />} />
       <Route path="/orderSuccess" element={<OrderSuccess />} />
