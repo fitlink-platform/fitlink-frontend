@@ -1,31 +1,23 @@
 import { Routes, Route } from "react-router-dom";
 import LoginPage from "../pages/LoginPage";
-import HomePage from "~/pages/customer/HomePage";
+import HomePage from "~/pages/student/HomePage";
 import PrivateRoute from "./PrivateRoute";
-import AboutPage from "~/pages/customer/AboutPage";
-import ShopPage from "~/pages/customer/ShopPage";
+import AboutPage from "~/pages/student/AboutPage";
 import RegisterPage from "~/pages/RegisterPage";
-import NewsPage from "~/pages/customer/NewsPage";
-import ContactPage from "~/pages/customer/ContactPage";
-import UserProfile from "~/pages/customer/UserProfile";
+import NewsPage from "~/pages/student/NewsPage";
+import ContactPage from "~/pages/student/ContactPage";
+import UserProfile from "~/pages/student/UserProfile";
 import UnauthorizedPage from "~/pages/UnauthorizedPage";
-import ProductDetailPage from "~/pages/customer/ProductDetailPage";
-import OrderPage from "~/pages/customer/OrderPage";
-import OrderSuccess from "~/pages/customer/OrderSuccess";
-import OrderDetail from "~/pages/customer/OrderDetail";
-import OrderHistoryPage from "~/pages/customer/OrderHistoryPage";
-{
-  /* admin */
-}
-{
-  /* admin */
-}
+import VerifyEmail from "~/pages/VerifyEmail";
+
 import ManagerUser from "../pages/admin/managerUser/ManagerUser";
 import UserDetail from "../pages/admin/ManagerUser/UserDetail";
 
 import ResetPasswordPage from "~/pages/ResetPasswordPage";
 import ForgotPasswordPage from "~/pages/ForgotPasswordPage";
-import DashboardPage from "../pages/admin/dashboardAdmin/DashboardPage";
+import DashboardPage from "~/pages/admin/dashboardAdmin/DashboardPage";
+import PTPage from "~/pages/pt/PTPage";
+import PTCalendarPage from "~/pages/pt/PTCalendarPage";
 
 export default function AppRouter() {
   return (
@@ -35,37 +27,19 @@ export default function AppRouter() {
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
       <Route path="/unauthorized" element={<UnauthorizedPage />} />
+      <Route path="/verify-email" element={<VerifyEmail />} />
+
       <Route
-        path="/customer/profile"
+        path="/profile"
         element={
-          <PrivateRoute allowedRoles={["customer"]}>
+          <PrivateRoute allowedRoles={["student", "pt"]}>
             <UserProfile />
           </PrivateRoute>
         }
       />
-          <Route
-        path="/customer/orders"
-        element={
-          <PrivateRoute allowedRoles={["customer"]}>
-            <OrderHistoryPage />
-          </PrivateRoute>
-        }
-      />
-           <Route
-        path="/customer/orders/:id"
-        element={
-          <PrivateRoute allowedRoles={["customer"]}>
-            <OrderDetail />
-          </PrivateRoute>
-        }
-      />
 
-      <Route path="/products/:id" element={<ProductDetailPage />} />
-      <Route path="/order" element={<OrderPage />} />
-      <Route path="/orderSuccess" element={<OrderSuccess />} />
       <Route path="/" element={<HomePage />} />
       <Route path="/about" element={<AboutPage />} />
-      <Route path="/shop" element={<ShopPage />} />
       <Route path="/news" element={<NewsPage />} />
       <Route path="/contact" element={<ContactPage />} />
       {/* Admin router */}
@@ -79,6 +53,10 @@ export default function AppRouter() {
       />
       <Route path="/admin/users" element={<ManagerUser />} />
       <Route path="/admin/users/:id" element={<UserDetail />} />
+
+      <Route path="/pt" element={<PrivateRoute allowedRoles={["pt"]}><PTPage /></PrivateRoute>} />
+      <Route path="/pt/schedule" element={<PrivateRoute allowedRoles={["pt"]}><PTCalendarPage /></PrivateRoute>} />
+
     </Routes>
   );
 }

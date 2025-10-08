@@ -38,9 +38,21 @@ export default function LoginPage() {
       setUser(profile);
       toast.success("Đăng nhập thành công!");
 
-      if (profile.role === "admin") {
-        navigate("/admin");
-      } else navigate("/");
+      switch (profile.role) {
+        case "admin":
+          navigate("/admin")
+          break;
+
+        case "pt":
+          navigate("/pt")
+          break;
+        case "student":
+          navigate("/")
+          break;
+
+        default:
+          break;
+      }
     } catch (err) {
       toast.error(err?.response?.data?.message || "Đăng nhập thất bại");
     }
@@ -54,8 +66,21 @@ export default function LoginPage() {
       setUser(data.user); // user lấy từ backend
       toast.success("Đăng nhập Google thành công!");
 
-      if (data.user.role === "admin") navigate("/admin");
-      else navigate("/");
+      switch (data.user.role) {
+        case "admin":
+          navigate("/admin")
+          break;
+
+        case "pt":
+          navigate("/pt")
+          break;
+        case "student":
+          navigate("/")
+          break;
+
+        default:
+          break;
+      }
     } catch (err) {
       toast.error(err?.response?.data?.message || "Đăng nhập Google thất bại");
     }
