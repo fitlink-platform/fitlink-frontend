@@ -46,7 +46,7 @@ export default function Navbar() {
       {/* NAVIGATION */}
       <nav className="hidden md:flex items-center gap-8 text-[15px] font-medium text-gray-800">
         <Link
-          to="/"
+          to="/home"
           className="relative hover:text-orange-500 transition-colors duration-200 after:content-[''] after:absolute after:w-0 after:h-[2px] after:left-0 after:-bottom-1 after:bg-orange-500 hover:after:w-full after:transition-all after:duration-300"
         >
           Home

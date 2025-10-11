@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "../pages/LoginPage";
 import HomePage from "~/pages/student/HomePage";
 import PrivateRoute from "./PrivateRoute";
@@ -16,8 +16,9 @@ import UserDetail from "../pages/admin/ManagerUser/UserDetail";
 import ResetPasswordPage from "~/pages/ResetPasswordPage";
 import ForgotPasswordPage from "~/pages/ForgotPasswordPage";
 import DashboardPage from "~/pages/admin/dashboardAdmin/DashboardPage";
-import PTPage from "~/pages/pt/PTPage";
+import PTDashboard from "~/pages/pt/PTDashboard";
 import PTCalendarPage from "~/pages/pt/PTCalendarPage";
+import PTPackages from "~/pages/pt/PTPackages";
 
 export default function AppRouter() {
   return (
@@ -38,7 +39,8 @@ export default function AppRouter() {
         }
       />
 
-      <Route path="/" element={<HomePage />} />
+      <Route path="/" element={<Navigate to="/home" replace/>} />
+      <Route path="/home" element={<HomePage />} />
       <Route path="/about" element={<AboutPage />} />
       <Route path="/news" element={<NewsPage />} />
       <Route path="/contact" element={<ContactPage />} />
@@ -54,8 +56,10 @@ export default function AppRouter() {
       <Route path="/admin/users" element={<ManagerUser />} />
       <Route path="/admin/users/:id" element={<UserDetail />} />
 
-      <Route path="/pt" element={<PrivateRoute allowedRoles={["pt"]}><PTPage /></PrivateRoute>} />
+      <Route path="/pt" element={<Navigate to="/pt/dashboard" replace/>} />
+      <Route path="/pt/dashboard" element={<PrivateRoute allowedRoles={["pt"]}><PTDashboard /></PrivateRoute>} />
       <Route path="/pt/schedule" element={<PrivateRoute allowedRoles={["pt"]}><PTCalendarPage /></PrivateRoute>} />
+      <Route path="/pt/packages" element={<PrivateRoute allowedRoles={["pt"]}><PTPackages/></PrivateRoute>} />
 
     </Routes>
   );
