@@ -3,18 +3,42 @@
 @tailwind utilities;
 
 @layer utilities {
-    .animate-fade-in {
-      animation: fade-in 0.3s ease-out;
+  .animate-fade-in {
+    animation: fade-in 0.3s ease-out;
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
     }
-  
-    @keyframes fade-in {
-      from {
-        opacity: 0;
-        transform: scale(0.95);
-      }
-      to {
-        opacity: 1;
-        transform: scale(1);
-      }
+
+    to {
+      opacity: 1;
+      transform: scale(1);
     }
   }
+}
+
+.content-scroll,
+main {
+  scrollbar-width: thin;
+  scrollbar-color: #6b7280 #111827;
+  /* thumb | track (gray-500 | gray-900) */
+}
+
+.content-scroll::-webkit-scrollbar,
+main::-webkit-scrollbar {
+  width: 8px;
+}
+
+.content-scroll::-webkit-scrollbar-track,
+main::-webkit-scrollbar-track {
+  background: rgba(17, 24, 39, 0.6);
+}
+
+.content-scroll::-webkit-scrollbar-thumb,
+main::-webkit-scrollbar-thumb {
+  background-color: rgba(107, 114, 128, 0.6);
+  border-radius: 9999px;
+}

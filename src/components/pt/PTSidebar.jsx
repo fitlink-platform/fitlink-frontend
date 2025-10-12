@@ -1,7 +1,7 @@
 import { NavLink } from "react-router-dom";
 import {
   FaHome, FaUsers, FaCalendarAlt, FaDumbbell, FaComments,
-  FaWallet, FaChartPie, FaSignOutAlt, FaBoxOpen
+  FaWallet, FaChartPie, FaSignOutAlt, FaBoxOpen, FaUser
 } from "react-icons/fa";
 
 function SideItem({ to, icon: Icon, label, onClick }) {
@@ -40,18 +40,20 @@ export default function PTSidebar({ open, onClose }) {
         <nav className="flex flex-col gap-1">
           <SideItem to="/pt/dashboard" icon={FaHome} label="Overview" onClick={onClose} />
           <SideItem to="/pt/students" icon={FaUsers} label="Students" onClick={onClose} />
+          <SideItem to="/pt/packages" icon={FaBoxOpen} label="Packages" onClick={onClose} />
+          <SideItem to="/pt/profile" icon={FaUser} label="Profile" onClick={onClose} />
           <SideItem to="/pt/schedule" icon={FaCalendarAlt} label="Schedule" onClick={onClose} />
           <SideItem to="/pt/workouts" icon={FaDumbbell} label="Workouts" onClick={onClose} />
           <SideItem to="/pt/chat" icon={FaComments} label="Messages" onClick={onClose} />
           <SideItem to="/pt/wallet" icon={FaWallet} label="Wallet" onClick={onClose} />
           <SideItem to="/pt/analytics" icon={FaChartPie} label="Analytics" onClick={onClose} />
-          <SideItem to="/pt/packages"  icon={FaBoxOpen} label="Packages" onClick={onClose} />
+
         </nav>
 
         <div className="mt-auto pt-6">
           <button
             className="flex w-full items-center justify-center gap-2 rounded-xl bg-white/10 px-3 py-2 text-sm text-gray-200 hover:bg-white/20"
-            onClick={() => {/* TODO: call logout */}}
+            onClick={() => {/* TODO: call logout */ }}
           >
             <FaSignOutAlt />
             Logout
