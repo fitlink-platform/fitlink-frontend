@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { getPTDetailPublic } from '~/services/ptProfileService'
 import { getPackagesByPTPublic } from '~/services/packageService'
 import {
@@ -11,6 +11,7 @@ import {
 
 const PTDetail = () => {
   const { id } = useParams()
+  const navigate = useNavigate()
   const [ptDetail, setPtDetail] = useState(null)
   const [packages, setPackages] = useState([])
   const [error, setError] = useState('')
@@ -215,20 +216,31 @@ const PTDetail = () => {
               {packages.map((pkg) => (
                 <div
                   key={pkg._id}
-                  className="bg-white border border-gray-100 rounded-2xl shadow-md p-5 hover:shadow-lg transition"
+                  className="bg-white border border-gray-100 rounded-2xl shadow-md p-5 hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
                 >
-                  <h3 className="text-lg font-semibold text-indigo-700">
-                    {pkg.name}
-                  </h3>
-                  <p className="text-gray-600 mt-2 line-clamp-2">
-                    {pkg.description}
-                  </p>
-                  <p className="mt-3 text-gray-800 font-bold">
-                    💰 {pkg.price?.toLocaleString()} VND
-                  </p>
-                  <p className="text-sm text-gray-500 mt-1">
-                    ⏱ Thời lượng: {pkg.duration} ngày
-                  </p>
+                  <div className="flex flex-col h-full">
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold text-indigo-700">
+                        {pkg.name}
+                      </h3>
+                      <p className="text-gray-600 mt-2 line-clamp-3 text-sm">
+                        {pkg.description}
+                      </p>
+                      <p className="mt-3 text-gray-800 font-bold text-base">
+                        💰 {pkg.price?.toLocaleString()} VND
+                      </p>
+                      <p className="text-sm text-gray-500 mt-1">
+                        ⏱ Thời lượng: {pkg.duration} ngày
+                      </p>
+                    </div>
+
+                    <button
+                      onClick={() => navigate(`/payment/${pkg._id}`)}
+                      className="mt-4 w-full bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white py-2.5 rounded-lg font-semibold text-sm transition"
+                    >
+                      🛒 Mua gói này
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
