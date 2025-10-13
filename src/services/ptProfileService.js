@@ -24,12 +24,24 @@ export const deleteMyProfile = async () => {
   const res = await axios.delete('/pt/profile/me')
   return res.data
 }
+// Xem tất cả các PT
+export const getAllPTProfilesPublic = async (params = {}) => {
+  const res = await axios.get('/pt/public/list', { params })
+  return res.data
+}
+// Xem thông tin chi tiết của PT (dành cho student)
+export const getPTDetailPublic = async (id) => {
+  const res = await axios.get(`/pt/public/${id}`)
+  return res.data
+}
 
 const ptProfileService = {
   getMyProfile,
   upsertMyProfile,
   getPTProfilePublic,
-  deleteMyProfile
+  deleteMyProfile,
+  getAllPTProfilesPublic,
+  getPTDetailPublic
 }
 
 export default ptProfileService
