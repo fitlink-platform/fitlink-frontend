@@ -19,6 +19,7 @@ import DashboardPage from "~/pages/admin/dashboardAdmin/DashboardPage";
 import PTDashboard from "~/pages/pt/PTDashboard";
 import PTCalendarPage from "~/pages/pt/PTCalendarPage";
 import PTPackages from "~/pages/pt/PTPackages";
+import PTProfile from "~/pages/pt/PTProfile";
 
 export default function AppRouter() {
   return (
@@ -60,6 +61,8 @@ export default function AppRouter() {
       <Route path="/pt/dashboard" element={<PrivateRoute allowedRoles={["pt"]}><PTDashboard /></PrivateRoute>} />
       <Route path="/pt/schedule" element={<PrivateRoute allowedRoles={["pt"]}><PTCalendarPage /></PrivateRoute>} />
       <Route path="/pt/packages" element={<PrivateRoute allowedRoles={["pt"]}><PTPackages/></PrivateRoute>} />
+      <Route path="/pt/profile" element={<PrivateRoute allowedRoles={["pt"]}><PTProfile/></PrivateRoute>} />
+
 
     </Routes>
   );
