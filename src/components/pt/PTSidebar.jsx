@@ -3,6 +3,9 @@ import {
   FaHome, FaUsers, FaCalendarAlt, FaDumbbell, FaComments,
   FaWallet, FaChartPie, FaSignOutAlt, FaBoxOpen, FaUser
 } from "react-icons/fa";
+import {logout} from "~/services/authService";
+import {toast} from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 function SideItem({ to, icon: Icon, label, onClick }) {
   return (
@@ -22,6 +25,21 @@ function SideItem({ to, icon: Icon, label, onClick }) {
 }
 
 export default function PTSidebar({ open, onClose }) {
+
+  const navigate = useNavigate()
+
+  const handleClickLogout = async () => {
+    try {
+      await logout()
+      toast.success("Logout Successful!")
+      navigate('/login')
+
+    } catch (error) {
+      console.error('Logout failed:', error); // xử lý lỗi cụ thể
+      throw error;
+    }
+  }
+
   return (
     <>
       {/* overlay mobile */}
@@ -53,7 +71,7 @@ export default function PTSidebar({ open, onClose }) {
         <div className="mt-auto pt-6">
           <button
             className="flex w-full items-center justify-center gap-2 rounded-xl bg-white/10 px-3 py-2 text-sm text-gray-200 hover:bg-white/20"
-            onClick={() => {/* TODO: call logout */ }}
+            onClick={handleClickLogout}
           >
             <FaSignOutAlt />
             Logout
