@@ -6,7 +6,8 @@ import {
   FaFacebook,
   FaInstagram,
   FaTiktok,
-  FaMapMarkerAlt
+  FaMapMarkerAlt,
+  FaArrowLeft
 } from 'react-icons/fa'
 
 const PTDetail = () => {
@@ -57,15 +58,27 @@ const PTDetail = () => {
   } = ptDetail
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
-      {/* Cover Image */}
-      <div className="relative w-full h-72 md:h-80">
+    <div className="min-h-screen bg-gray-50 pb-20 relative">
+      <div className="relative w-full h-80 md:h-[360px]">
+        <button
+          onClick={() => navigate(-1)}
+          className="absolute top-4 left-4 z-30 flex items-center gap-2 bg-black/50 hover:bg-black/70 text-white px-4 py-2 rounded-full text-sm font-medium shadow-md transition"
+        >
+          <FaArrowLeft className="text-sm" />
+          <span>Quay lại</span>
+        </button>
+
+        {/* Ảnh cover */}
         <img
           src={coverImage}
           alt="cover"
           className="w-full h-full object-cover rounded-b-3xl shadow-md"
         />
+
+        {/* Lớp overlay mờ */}
         <div className="absolute inset-0 bg-black/30 rounded-b-3xl" />
+
+        {/* Avatar PT */}
         <div className="absolute -bottom-16 left-1/2 md:left-24 transform -translate-x-1/2 md:translate-x-0">
           <img
             src={user.avatar}
