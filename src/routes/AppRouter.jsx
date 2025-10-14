@@ -21,6 +21,8 @@ import PTCalendarPage from '~/pages/pt/PTCalendarPage'
 import PTPackages from '~/pages/pt/PTPackages'
 import PTProfile from '~/pages/pt/PTProfile'
 import PTDetail from '~/pages/student/PTDetail'
+import PTPackageCreate from '~/pages/pt/PTPackageCreate'
+
 export default function AppRouter() {
   return (
     <Routes>
@@ -83,6 +85,7 @@ export default function AppRouter() {
           </PrivateRoute>
         }
       />
+      <Route path="/pt/packages/new" element={<PTPackageCreate />} />
       <Route
         path="/pt/profile"
         element={
@@ -91,6 +94,7 @@ export default function AppRouter() {
           </PrivateRoute>
         }
       />
+      
     </Routes>
   )
 }
