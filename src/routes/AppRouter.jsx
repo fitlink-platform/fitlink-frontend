@@ -21,6 +21,7 @@ import PTCalendarPage from '~/pages/pt/PTCalendarPage'
 import PTPackages from '~/pages/pt/PTPackages'
 import PTProfile from '~/pages/pt/PTProfile'
 import PTDetail from '~/pages/student/PTDetail'
+
 export default function AppRouter() {
   return (
     <Routes>
@@ -91,6 +92,7 @@ export default function AppRouter() {
           </PrivateRoute>
         }
       />
+
     </Routes>
   )
 }
