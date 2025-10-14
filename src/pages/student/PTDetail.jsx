@@ -3,6 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { getPTDetailPublic } from '~/services/ptProfileService'
 import { getPackagesByPTPublic } from '~/services/packageService'
 import axiosClient from '~/api/axiosClient'
+import PackageDetailModal from '~/components/PackageDetailModal'
+import { toast } from 'react-toastify'; 
 import {
   FaFacebook,
   FaInstagram,
@@ -25,25 +27,28 @@ const useAuthContext = () => {
 
 
 const PTDetail = () => {
-  const { id } = useParams() // id là PT ID
-  const navigate = useNavigate()
-  const [ptDetail, setPtDetail] = useState(null)
-  const [packages, setPackages] = useState([])
-  const [error, setError] = useState('')
+    const { id } = useParams() // id là PT ID
+    const navigate = useNavigate()
+    const [ptDetail, setPtDetail] = useState(null)
+    const [packages, setPackages] = useState([])
+    const [error, setError] = useState('')
 
-  // ⚡️ FIX LỖI: Lấy userLoggedin và studentId ở đây để đảm bảo nó được khởi tạo
-  const { user: userLoggedIn } = useAuthContext(); 
-  const studentId = userLoggedIn?._id; 
-  const ptId = id // ID của PT đang xem
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedPackage, setSelectedPackage] = useState(null); 
+    const [isDetailLoading, setIsDetailLoading] = useState(false); 
 
-  const handleGetPtDetail = async () => {
-    try {
-      const res = await getPTDetailPublic(id)
-      setPtDetail(res.data)
-    } catch (e) {
-      setError('Something went wrong!')
-    }
-  }
+    const { user: userLoggedIn } = useAuthContext(); 
+    const studentId = userLoggedIn?._id; 
+    const ptId = id 
+
+    const handleGetPtDetail = async () => {
+        try {
+            const res = await getPTDetailPublic(id)
+            setPtDetail(res.data)
+        } catch (e) {
+            setError('Something went wrong!')
+        }
+    }
 
   const handleGetPackagePublic = async () => {
     try {
@@ -54,55 +59,39 @@ const PTDetail = () => {
     }
   }
   
-  // 💡 BƯỚC 2: HÀM XỬ LÝ THANH TOÁN (Logic đã fix)
- const handleBuyPackage = async (pkg) => {
-    // ⚠️ DEBUG LOG: Kiểm tra studentId CÓ GIÁ TRỊ TẠI ĐÂY hay không
-    console.log('Current studentId in scope:', studentId);
-    
-    // 1. KIỂM TRA ĐĂNG NHẬP (Dùng biến studentId đã được định nghĩa ở ngoài)
-    if (!studentId) {
-        alert('Vui lòng đăng nhập để mua gói tập.');
-        navigate('/login'); // Chuyển hướng khi chưa đăng nhập
-        return;
-    }
-    
-    // 2. KIỂM TRA DỮ LIỆU BẮT BUỘC
-    const isValidPrice = pkg.price !== undefined && pkg.price !== null && Number.isFinite(pkg.price);
-    
-    if (!ptId || !pkg?._id || !isValidPrice) {
-        alert('Lỗi: Thiếu thông tin gói tập hoặc PT ID hoặc giá tiền không hợp lệ.');
-        console.error('Missing required data:', { studentId, ptId, pkg });
-        return;
-    }
+  //  BƯỚC 2: HÀM XỬ LÝ THANH TOÁN (Logic đã fix)
+ const handleShowDetails = async (pkgId) => {
+        setIsDetailLoading(true);
+        setSelectedPackage(null);
 
-    try {
-        // GỌI API KHỞI TẠO GIAO DỊCH
-        // SỬ DỤNG TRƯỜNG 'price' (đã fix lỗi 400)
-        const response = await axiosClient.post('/transactions/initiate', {
-            studentId: studentId,
-            ptId: ptId, 
-            packageId: pkg._id,
-            price: pkg.price, 
+        try {
+            // Logic Lấy chi tiết gói tập (PHẦN NÀY ĐANG LỖI 404 Ở BACKEND CỦA BẠN)
+            const response = await axiosClient.get(`/pt/packages/${pkgId}`); 
+            
+            setSelectedPackage(response.data.data); 
+            setIsModalOpen(true); 
+        } catch (error) {
+            console.error('Lỗi khi tải chi tiết gói:', error);
+            // Vẫn giữ toast này để cảnh báo bạn về lỗi 404/400
+            toast.error("Lỗi: Không thể tải chi tiết gói. Vui lòng kiểm tra API /packages/:id ở Backend!");
+        } finally {
+            setIsDetailLoading(false);
+        }
+    }
 
-        });
+    // 2. HÀM THANH TOÁN (PLACEHOLDER - KHÔNG CÓ API HAY NAVIGATE)
+    const handlePaymentPlaceholder = (packageData) => {
+        console.log(`[PAYMENT ACTION - PLACEHOLDER] Bấm nút Thanh toán cho Gói: ${packageData.name}`);
+        
+        toast.info("Chức năng Thanh toán đang được phát triển.");
+        setIsModalOpen(false); 
+    };
 
-        const { transactionId, status } = response.data;
-
-        // KIỂM TRA & ĐIỀU HƯỚNG
-        if (status === 'paid') {
-            alert('Gói miễn phí đã được kích hoạt thành công!');
-        } else if (transactionId) {
-            navigate(`/payment/${transactionId}`); 
-        }
-
-    } catch (error) {
-        const backendMessage = error.response?.data?.message;
-        
-        console.error('Lỗi khi khởi tạo giao dịch:', error.response?.data || error.message);
-        alert(`Lỗi: ${backendMessage || 'Không thể khởi tạo giao dịch. Vui lòng kiểm tra Console.'}`);
-    }
-};
-
+    const closeModal = () => {
+        setIsModalOpen(false);
+        setSelectedPackage(null); 
+    }
+    
 
   useEffect(() => {
     handleGetPtDetail()
@@ -304,13 +293,13 @@ const PTDetail = () => {
                 ⏱ Thời lượng: {pkg.duration} ngày
               </p>
             </div>
-
             <button
-              onClick={() => handleBuyPackage(pkg)}
-              className="mt-4 w-full bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white py-2.5 rounded-lg font-semibold text-sm transition"
-            >
-              🛒 Mua gói này
-            </button>
+                onClick={() => handleShowDetails(pkg._id)} 
+                disabled={isDetailLoading}
+                className="mt-4 w-full bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white py-2.5 rounded-lg font-semibold text-sm transition"
+                >
+                 {isDetailLoading ? 'Đang tải...' : 'Xem chi tiết'}
+            </button>
           </div>
         </div>
               ))}
@@ -318,6 +307,12 @@ const PTDetail = () => {
           )}
         </div>
       </div>
+        <PackageDetailModal
+                isOpen={isModalOpen}
+                onClose={closeModal}
+                packageData={selectedPackage}
+                onProceedToPayment={handlePaymentPlaceholder} 
+            />
     </div>
   )
 }
