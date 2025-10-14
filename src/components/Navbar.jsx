@@ -1,35 +1,34 @@
-import React, { useEffect, useState, useRef, useContext } from 'react';
-import { FaUser } from "react-icons/fa";
-import { Link, useNavigate } from "react-router-dom";
-import { AuthContext } from "~/contexts/AuthContext";
-import { logout } from '~/services/authService';
-import { toast } from 'react-toastify';
+import React, { useEffect, useState, useRef, useContext } from 'react'
+import { FaUser } from 'react-icons/fa'
+import { Link, useNavigate } from 'react-router-dom'
+import { AuthContext } from '~/contexts/AuthContext'
+import { logout } from '~/services/authService'
+import { toast } from 'react-toastify'
 
 export default function Navbar() {
-  const { user } = useContext(AuthContext);
-  const [showDropdown, setShowDropdown] = useState(false);
-  const dropdownRef = useRef();
+  const { user } = useContext(AuthContext)
+  const [showDropdown, setShowDropdown] = useState(false)
+  const dropdownRef = useRef()
   const navigate = useNavigate()
 
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-        setShowDropdown(false);
+        setShowDropdown(false)
       }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   const handleClickLogout = async () => {
     try {
       await logout()
-      toast.success("Logout Successful!")
+      toast.success('Logout Successful!')
       navigate('/login')
-
     } catch (error) {
-      console.error('Logout failed:', error); // xử lý lỗi cụ thể
-      throw error;
+      console.error('Logout failed:', error) // xử lý lỗi cụ thể
+      throw error
     }
   }
 
@@ -56,6 +55,12 @@ export default function Navbar() {
           className="relative hover:text-orange-500 transition-colors duration-200 after:content-[''] after:absolute after:w-0 after:h-[2px] after:left-0 after:-bottom-1 after:bg-orange-500 hover:after:w-full after:transition-all after:duration-300"
         >
           Programs
+        </Link>
+        <Link
+          to="/list-pt"
+          className="relative hover:text-orange-500 transition-colors duration-200 after:content-[''] after:absolute after:w-0 after:h-[2px] after:left-0 after:-bottom-1 after:bg-orange-500 hover:after:w-full after:transition-all after:duration-300"
+        >
+          Trainers
         </Link>
         <Link
           to="/pricing"
@@ -90,8 +95,8 @@ export default function Navbar() {
                 <li
                   className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                   onClick={() => {
-                    navigate('/profile');
-                    setShowDropdown(false);
+                    navigate('/profile')
+                    setShowDropdown(false)
                   }}
                 >
                   Profile
@@ -99,13 +104,15 @@ export default function Navbar() {
                 <li
                   className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                   onClick={() => {
-                    navigate('/customer/orders');
-                    setShowDropdown(false);
+                    navigate('/customer/orders')
+                    setShowDropdown(false)
                   }}
                 >
                   My Packages
                 </li>
-                <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">Support</li>
+                <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                  Support
+                </li>
                 <li
                   onClick={handleClickLogout}
                   className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-red-600 font-medium"
@@ -125,6 +132,5 @@ export default function Navbar() {
         </button>
       )}
     </header>
-
-  );
+  )
 }
