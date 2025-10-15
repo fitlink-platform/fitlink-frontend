@@ -1,10 +1,7 @@
-import React, { useEffect, useState, useContext } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { getPTDetailPublic } from '~/services/ptProfileService'
 import { getPackagesByPTPublic } from '~/services/packageService'
-import PackageDetailModal from '~/components/PackageDetailModal'
-import axiosClient from '~/api/axiosClient'
-import { toast } from 'react-toastify';
 import {
     FaFacebook,
     FaInstagram,
@@ -12,19 +9,7 @@ import {
     FaMapMarkerAlt,
     FaArrowLeft
 } from 'react-icons/fa'
-
-// 💡 BƯỚC 1: IMPORT CONTEXT
-import { AuthContext } from '~/contexts/AuthContext'
-
-// 💡 HÀM HELPER ĐỂ DÙNG CONTEXT DỄ DÀNG HƠN
-const useAuthContext = () => {
-    const context = useContext(AuthContext);
-    if (!context) {
-        console.error("PTDetail must be used within an AuthProvider");
-        return { user: null };
-    }
-    return context;
-};
+import PackageDetailModal from '~/components/student/PackageDetailModel'
 
 const PTDetail = () => {
     const { id } = useParams()
@@ -32,14 +17,8 @@ const PTDetail = () => {
     const [ptDetail, setPtDetail] = useState(null)
     const [packages, setPackages] = useState([])
     const [error, setError] = useState('')
+    const [selectedPackage, setSelectedPackage] = useState(null)
 
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedPackage, setSelectedPackage] = useState(null);
-    const [isDetailLoading, setIsDetailLoading] = useState(false);
-
-    const { user: userLoggedIn } = useAuthContext();
-    const studentId = userLoggedIn?._id;
-    const ptId = id
 
     const handleGetPtDetail = async () => {
         try {
@@ -57,39 +36,6 @@ const PTDetail = () => {
         } catch (e) {
             setError('Something went wrong!')
         }
-    }
-
-    //  BƯỚC 2: HÀM XỬ LÝ THANH TOÁN (Logic đã fix)
-    const handleShowDetails = async (pkgId) => {
-        setIsDetailLoading(true);
-        setSelectedPackage(null);
-
-        try {
-            // Logic Lấy chi tiết gói tập (PHẦN NÀY ĐANG LỖI 404 Ở BACKEND CỦA BẠN)
-            const response = await axiosClient.get(`/pt/packages/${pkgId}`);
-
-            setSelectedPackage(response.data.data);
-            setIsModalOpen(true);
-        } catch (error) {
-            console.error('Lỗi khi tải chi tiết gói:', error);
-            // Vẫn giữ toast này để cảnh báo bạn về lỗi 404/400
-            toast.error("Lỗi: Không thể tải chi tiết gói. Vui lòng kiểm tra API /packages/:id ở Backend!");
-        } finally {
-            setIsDetailLoading(false);
-        }
-    }
-
-    // 2. HÀM THANH TOÁN (PLACEHOLDER - KHÔNG CÓ API HAY NAVIGATE)
-    const handlePaymentPlaceholder = (packageData) => {
-        console.log(`[PAYMENT ACTION - PLACEHOLDER] Bấm nút Thanh toán cho Gói: ${packageData.name}`);
-
-        toast.info("Chức năng Thanh toán đang được phát triển.");
-        setIsModalOpen(false);
-    };
-
-    const closeModal = () => {
-        setIsModalOpen(false);
-        setSelectedPackage(null);
     }
 
     useEffect(() => {
@@ -303,13 +249,14 @@ const PTDetail = () => {
                                                 ⏱ Thời lượng: {pkg.duration} ngày
                                             </p>
                                         </div>
+
                                         <button
-                                            onClick={() => handleShowDetails(pkg._id)}
-                                            disabled={isDetailLoading}
+                                            onClick={() => setSelectedPackage(pkg)}
                                             className="mt-4 w-full bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white py-2.5 rounded-lg font-semibold text-sm transition"
                                         >
-                                            {isDetailLoading ? 'Đang tải...' : 'Xem chi tiết'}
+                                            Xem chi tiết
                                         </button>
+
                                     </div>
                                 </div>
                             ))}
@@ -317,13 +264,15 @@ const PTDetail = () => {
                     )}
                 </div>
             </div>
-            <PackageDetailModal
-                isOpen={isModalOpen}
-                onClose={closeModal}
-                packageData={selectedPackage}
-                onProceedToPayment={handlePaymentPlaceholder}
-            />
+            {selectedPackage && (
+                <PackageDetailModal
+                    pkg={selectedPackage}
+                    onClose={() => setSelectedPackage(null)}
+                />
+            )}
+
         </div>
+
     )
 }
 

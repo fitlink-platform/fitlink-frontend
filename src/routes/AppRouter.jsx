@@ -21,6 +21,9 @@ import PTCalendarPage from '~/pages/pt/PTCalendarPage'
 import PTPackages from '~/pages/pt/PTPackages'
 import PTProfile from '~/pages/pt/PTProfile'
 import PTDetail from '~/pages/student/PTDetail'
+import PaymentResult from '~/pages/payment/PaymentResult'
+import MyCalendar from '~/pages/calendar/MyCalendar'
+import PTStudents from '~/pages/pt/PTStudent'
 
 export default function AppRouter() {
   return (
@@ -68,14 +71,14 @@ export default function AppRouter() {
           </PrivateRoute>
         }
       />
-      <Route
+      {/* <Route
         path="/pt/schedule"
         element={
           <PrivateRoute allowedRoles={['pt']}>
             <PTCalendarPage />
           </PrivateRoute>
         }
-      />
+      /> */}
       <Route
         path="/pt/packages"
         element={
@@ -92,6 +95,13 @@ export default function AppRouter() {
           </PrivateRoute>
         }
       />
+      <Route path="/payment/result" element={<PaymentResult />} />
+
+      {/* ... */}
+      <Route path="/pt/schedule" element={<MyCalendar />} />
+      {/* Student có thể dùng cùng page này nếu muốn, hoặc tách ra layout khác */}
+      <Route path="/pt/students" element={<PTStudents />} />
+
 
     </Routes>
   )
