@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
 import { FaUsers, FaCalendarAlt, FaWallet, FaChartPie } from "react-icons/fa";
 import PTMainLayout from "~/layouts/pt/PTMainLayout";
+import { getMyWallet } from "~/services/ptWalletService";
+import { useEffect, useState } from "react";
 
 // --- small UI components ---
 function StatCard({ title, value, sub, children }) {
@@ -127,6 +129,23 @@ function StudentsMini() {
 }
 
 export default function PTDashboard() {
+
+  const [balance, setBalance] = useState(0)
+
+  const fetchWallet = async () => {
+    try {
+      const data = await getMyWallet()
+      
+      setBalance(data.data.balance || 0)
+    } catch (error) {
+      console.error('Failed to fetch wallet:', error)
+    }
+  }
+  
+  useEffect(() => {
+    fetchWallet()
+  }, [])
+  
   return (
     <PTMainLayout>
       {/* Stats */}
@@ -137,7 +156,7 @@ export default function PTDashboard() {
         <StatCard title="Sessions today" value="5" sub="2 completed">
           <FaCalendarAlt />
         </StatCard>
-        <StatCard title="Wallet balance" value="4.200.000đ" sub="Ready to payout">
+        <StatCard title="Wallet balance" value={`${balance.toLocaleString()}₫`} sub="Ready to payout">
           <FaWallet />
         </StatCard>
         <StatCard title="Avg rating" value="4.8★" sub="128 reviews">

@@ -6,8 +6,8 @@ import dayGridPlugin from '@fullcalendar/daygrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import { getMySessions, createSession, updateSession, deleteSession } from '~/services/sessionService'
 import { toast } from 'react-toastify'
-import PTMainLayout from '~/layouts/pt/PTMainLayout' // dùng cho PT; Student thì thay layout khác nếu có
-import { useAuth } from "~/contexts/AuthProvider";
+import PTMainLayout from '~/layouts/pt/PTMainLayout'
+import SessionDrawer from '~/components/pt/SessionDrawer'
 
 // Helper: map status → màu
 const statusColors = {
@@ -24,7 +24,11 @@ const mapSessionToEvent = (s) => ({
   title: s.title || 'Buổi tập',
   start: s.startTime,
   end: s.endTime,
-  extendedProps: { session: s },
+  extendedProps: {
+    session: s,
+    // nếu controller populate: studentPackage.package.name
+    sessionPackageName: s?.studentPackage?.package?.name
+  },
   backgroundColor: statusColors[s.status] || '#2563eb',
   borderColor: statusColors[s.status] || '#2563eb'
 })
@@ -32,7 +36,11 @@ const mapSessionToEvent = (s) => ({
 export default function MyCalendar() {
   const [events, setEvents] = useState([])
   const [loading, setLoading] = useState(true)
-  const [role, setRole] = useState('pt') // nếu bạn có context user, set từ đó; ở đây demo
+  const [role, setRole] = useState('pt') // nếu có context user, set từ đó
+
+  // Drawer state
+  const [drawerOpen, setDrawerOpen] = useState(false)
+  const [drawerData, setDrawerData] = useState(null)
 
   // tải dữ liệu
   const load = async () => {
@@ -53,14 +61,11 @@ export default function MyCalendar() {
   // quyền kéo-thả/resize: chỉ PT
   const editable = useMemo(() => role === 'pt', [role])
 
-  // Tạo sự kiện khi user “drag select” trên lưới (PT)
+  // Tạo sự kiện khi select (PT) — bạn sẽ thay bằng modal tạo nhanh sau
   const handleSelect = async (info) => {
     if (!editable) return
-    // mở modal/confirm nhanh:
     const title = prompt('Tiêu đề buổi tập? (VD: Ngực + Tay trước)')
     if (!title) return
-
-    // bạn cần studentPackageId để POST; giai đoạn đầu ta có thể hỏi nhanh:
     const spId = prompt('Nhập studentPackageId (tạm):')
     if (!spId) return
 
@@ -93,7 +98,7 @@ export default function MyCalendar() {
     }
   }
 
-  // Resize (kéo giãn) (PT)
+  // Resize (PT)
   const handleEventResize = async (resizeInfo) => {
     if (!editable) return
     const { event } = resizeInfo
@@ -106,29 +111,16 @@ export default function MyCalendar() {
     }
   }
 
-  // Click event: mở chi tiết / đổi status / xoá
-  const handleEventClick = async (clickInfo) => {
-    const { session } = clickInfo.event.extendedProps
-    const action = window.prompt(
-      `Buổi: ${session.title}\nTrạng thái: ${session.status}\n\nChọn:\n1 = Completed\n2 = Cancelled\n3 = Missed\n4 = Xoá\n(OK bỏ qua)`, ''
-    )
-    try {
-      if (action === '1') {
-        await updateSession(session._id, { status: 'completed', attendance: 'present' })
-      } else if (action === '2') {
-        await updateSession(session._id, { status: 'cancelled' })
-      } else if (action === '3') {
-        await updateSession(session._id, { status: 'missed', attendance: 'absent' })
-      } else if (action === '4') {
-        await deleteSession(session._id)
-      } else {
-        return
-      }
-      // reload đơn giản để sync màu + state
-      await load()
-    } catch (e) {
-      toast.error('Thao tác thất bại')
-    }
+  // CLICK EVENT → mở Drawer (bỏ window.prompt)
+  const handleEventClick = (clickInfo) => {
+    const session = clickInfo.event.extendedProps.session
+    setDrawerData({
+      session,
+      start: clickInfo.event.start,
+      end: clickInfo.event.end,
+      sessionPackageName: clickInfo.event.extendedProps.sessionPackageName
+    })
+    setDrawerOpen(true)
   }
 
   return (
@@ -142,7 +134,6 @@ export default function MyCalendar() {
         </div>
 
         <div className="rounded-2xl border border-white/10 bg-white p-2">
-          {/* FullCalendar */}
           <FullCalendar
             plugins={[timeGridPlugin, dayGridPlugin, interactionPlugin]}
             initialView="timeGridWeek"
@@ -155,34 +146,33 @@ export default function MyCalendar() {
             slotMaxTime="22:00:00"
             expandRows
             height="80vh"
-            // múi giờ VN
             timeZone="local"
             locale="vi"
-            firstDay={1} // Monday
+            firstDay={1}
             nowIndicator={true}
-
-            // data
             events={events}
-
-            // quyền
             selectable={editable}
             editable={editable}
             droppable={false}
             eventStartEditable={editable}
             eventDurationEditable={editable}
-
-            // handlers
             select={handleSelect}
             eventDrop={handleEventDrop}
             eventResize={handleEventResize}
             eventClick={handleEventClick}
-
-            // style gần giống Google Calendar
             slotLabelFormat={{ hour: '2-digit', minute: '2-digit', hour12: false }}
             dayHeaderFormat={{ weekday: 'short', month: 'numeric', day: 'numeric' }}
           />
         </div>
       </div>
+
+      {/* Drawer phải */}
+      <SessionDrawer
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        eventData={drawerData}
+        onChanged={load}
+      />
     </PTMainLayout>
   )
 }
