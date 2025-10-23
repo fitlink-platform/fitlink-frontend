@@ -24,6 +24,7 @@ import PTDetail from '~/pages/student/PTDetail'
 import PaymentResult from '~/pages/payment/PaymentResult'
 import MyCalendar from '~/pages/calendar/MyCalendar'
 import PTStudents from '~/pages/pt/PTStudent'
+import PTProfileV1 from '~/pages/pt/PTProfileV1'
 
 export default function AppRouter() {
   return (
@@ -95,6 +96,14 @@ export default function AppRouter() {
           </PrivateRoute>
         }
       />
+        {/* <Route
+        path="/pt/profile"
+        element={
+          <PrivateRoute allowedRoles={['pt']}>
+            <PTProfileV1 />
+          </PrivateRoute>
+        }
+      /> */}
       <Route path="/payment/result" element={<PaymentResult />} />
 
       {/* ... */}
