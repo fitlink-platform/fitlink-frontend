@@ -99,6 +99,14 @@ export default function AppRouter() {
           </PrivateRoute>
         }
       />
+        {/* <Route
+        path="/pt/profile"
+        element={
+          <PrivateRoute allowedRoles={['pt']}>
+            <PTProfileV1 />
+          </PrivateRoute>
+        }
+      /> */}
       <Route path="/payment/result" element={<PaymentResult />} />
 
       {/* ... */}
