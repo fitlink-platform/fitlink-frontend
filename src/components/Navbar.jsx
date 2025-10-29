@@ -110,6 +110,15 @@ export default function Navbar() {
                 >
                   My Packages
                 </li>
+                <li
+                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                  onClick={() => {
+                    navigate('/chat')
+                    setShowDropdown(false)
+                  }}
+                >
+                  My Messages
+                </li>
                 <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
                   Support
                 </li>
