@@ -5,6 +5,8 @@ import PTMainLayout from '~/layouts/pt/PTMainLayout'
 import ptProfileService from '~/services/ptProfileService'
 import ptApprovalService from '~/services/ptApprovalService'
 import { getMyAccount as getUserProfile, updateProfile as updateUserProfile } from '~/services/userService'
+import MapPicker from '~/components/MapPicker'
+import Map from '~/components/Map'
 
 const emptyProfile = {
   coverImage: '',
@@ -56,6 +58,12 @@ export default function PTProfile() {
   const setPG = (key, value) => setForm(p => ({ ...p, primaryGym: { ...(p.primaryGym || {}), [key]: value } }))
   const setDM = (key, value) => setForm(p => ({ ...p, deliveryModes: { ...(p.deliveryModes || {}), [key]: value } }))
   const setTP = (key, value) => setForm(p => ({ ...p, travelPolicy: { ...(p.travelPolicy || {}), [key]: value } }))
+
+  const [selected, setSelected] = useState({
+    fullAddress: "51 Lê Thiện Trị, Hòa Quý, Đà Nẵng",
+    lat: 15.978692898267385,
+    lng: 108.2508652672883,
+  });
 
   const [lng, lat] = useMemo(
     () => form.primaryGym?.location?.coordinates || [0, 0],
@@ -229,10 +237,10 @@ export default function PTProfile() {
     latestRequest?.status === 'pending'
       ? 'bg-yellow-500/20 text-yellow-200'
       : latestRequest?.status === 'approved'
-      ? 'bg-green-500/20 text-green-200'
-      : latestRequest?.status === 'rejected'
-      ? 'bg-red-500/20 text-red-200'
-      : 'bg-gray-500/20 text-gray-200'
+        ? 'bg-green-500/20 text-green-200'
+        : latestRequest?.status === 'rejected'
+          ? 'bg-red-500/20 text-red-200'
+          : 'bg-gray-500/20 text-gray-200'
 
   const profileLocked = latestRequest?.status === 'pending' // tuỳ chọn khoá input khi pending
 
@@ -532,6 +540,46 @@ export default function PTProfile() {
             </div>
           </div>
 
+          <div className="rounded-xl border border-white/10 p-4">
+            <h3 className="mb-3 text-sm font-semibold text-white">Primary Gym</h3>
+
+            {/* Hiển thị map cơ bản
+            <MapPicker
+              center={form.primaryGym?.location?.coordinates?.length === 2
+                ? form.primaryGym.location.coordinates
+                : [106.700981, 10.776889]}
+              zoom={14}
+              height={340}
+            /> */}
+
+            <MapPicker
+              value={{
+                address: form.primaryGym?.address || '',
+                coordinates: form.primaryGym?.location?.coordinates || [106.700981, 10.776889]
+              }}
+              onChange={({ address, coordinates }) => {
+                setForm(p => ({
+                  ...p,
+                  primaryGym: {
+                    ...(p.primaryGym || {}),
+                    address,
+                    location: { type: 'Point', coordinates }
+                  }
+                }))
+              }}
+              countryFilter="countrycode:vn"
+              height={400}
+            />
+          </div>
+
+
+
+          {/* <Map center={{
+            fullAddress: form.primaryGym?.address || '',
+            lat: form.primaryGym?.location?.coordinates?.[1] || 15.974,
+            lng: form.primaryGym?.location?.coordinates?.[0] || 108.252,
+          }} /> */}
+
           {/* Coords + photos */}
           <div className="mt-3 grid gap-4 md:grid-cols-3">
             <div>
@@ -701,11 +749,13 @@ export default function PTProfile() {
         </div>
       </form>
 
-      {(message || error) && (
-        <div className={`mt-4 rounded-lg px-3 py-2 text-sm ${message ? 'bg-green-500/20 text-green-200' : 'bg-red-500/20 text-red-200'}`}>
-          {message || error}
-        </div>
-      )}
-    </PTMainLayout>
+      {
+        (message || error) && (
+          <div className={`mt-4 rounded-lg px-3 py-2 text-sm ${message ? 'bg-green-500/20 text-green-200' : 'bg-red-500/20 text-red-200'}`}>
+            {message || error}
+          </div>
+        )
+      }
+    </PTMainLayout >
   )
 }
