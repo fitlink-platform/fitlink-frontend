@@ -26,6 +26,8 @@ import MyCalendar from "~/pages/calendar/MyCalendar";
 import PTStudents from "~/pages/pt/PTStudent";
 import PTRequestList from "~/pages/admin/PTRequestList";
 import PTRequestDetail from "~/pages/admin/PTRequestDetail";
+import PTCreatePackage from "~/pages/pt/PTCreatePackage";
+import PTSchedule from "~/pages/pt/PTSchedule";
 
 export default function AppRouter() {
   return (
@@ -46,6 +48,7 @@ export default function AppRouter() {
         }
       />
       <Route path="/" element={<Navigate to="/home" replace />} />
+      <Route path="*" element={<Navigate to="/home" replace />} />
       <Route path="/home" element={<HomePage />} />
       <Route path="/about" element={<AboutPage />} />
       <Route path="/news" element={<NewsPage />} />
@@ -91,6 +94,7 @@ export default function AppRouter() {
           </PrivateRoute>
         }
       />
+      <Route path="/pt/packages/new" element={<PrivateRoute allowedRoles={["pt"]}><PTCreatePackage/></PrivateRoute>} />
       <Route
         path="/pt/profile"
         element={
@@ -99,20 +103,14 @@ export default function AppRouter() {
           </PrivateRoute>
         }
       />
-        {/* <Route
-        path="/pt/profile"
-        element={
-          <PrivateRoute allowedRoles={['pt']}>
-            <PTProfileV1 />
-          </PrivateRoute>
-        }
-      /> */}
       <Route path="/payment/result" element={<PaymentResult />} />
 
       {/* ... */}
-      <Route path="/pt/schedule" element={<MyCalendar />} />
+      <Route path="/pt/schedule1" element={<MyCalendar />} />
+      <Route path="/pt/schedule" element={<PTSchedule />} />
       {/* Student có thể dùng cùng page này nếu muốn, hoặc tách ra layout khác */}
       <Route path="/pt/students" element={<PTStudents />} />
+
     </Routes>
   );
 }
