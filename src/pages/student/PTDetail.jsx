@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { getPTDetailPublic } from '~/services/ptProfileService'
 import { getPackagesByPTPublic } from '~/services/packageService'
+import axiosClient from '~/api/axiosClient'
 import {
     FaFacebook,
     FaInstagram,
@@ -21,27 +22,19 @@ const PTDetail = () => {
 
 
     const handleGetPtDetail = async () => {
-        try {
-            const res = await getPTDetailPublic(id)
-            setPtDetail(res.data)
-        } catch (e) {
-            setError('Something went wrong!')
-        }
-    }
+  try {
+    const res = await axiosClient.get(`/search/pts/${id}`)
+    setPtDetail(res.data.data)
+    setPackages(res.data.data.packages || [])
+  } catch (e) {
+    console.error(e)
+    setError('Không thể tải thông tin huấn luyện viên. Vui lòng thử lại sau.')
+  }
+}
 
-    const handleGetPackagePublic = async () => {
-        try {
-            const res = await getPackagesByPTPublic(id)
-            setPackages(res?.data || [])
-        } catch (e) {
-            setError('Something went wrong!')
-        }
-    }
-
-    useEffect(() => {
-        handleGetPtDetail()
-        handleGetPackagePublic()
-    }, [id])
+useEffect(() => {
+  handleGetPtDetail()
+}, [id])
 
     if (error)
         return <div className="text-center text-red-500 mt-10">{error}</div>
