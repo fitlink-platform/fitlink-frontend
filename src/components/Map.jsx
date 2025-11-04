@@ -19,7 +19,7 @@ export default function Map({ center }) {
 
     new maplibregl.Marker({ color: "#d33" })
       .setLngLat([center.lng, center.lat])
-      .setPopup(new maplibregl.Popup().setText(center.fullAddress))
+      // .setPopup(new maplibregl.Popup().setText(center.fullAddress))
       .addTo(map)
       .togglePopup();
 
