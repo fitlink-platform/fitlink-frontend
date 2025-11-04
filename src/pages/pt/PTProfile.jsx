@@ -6,7 +6,13 @@ import ptProfileService from '~/services/ptProfileService'
 import ptApprovalService from '~/services/ptApprovalService'
 import { getMyAccount as getUserProfile, updateProfile as updateUserProfile } from '~/services/userService'
 import MapPicker from '~/components/MapPicker'
-import Map from '~/components/Map'
+
+const DEFAULT_INTERVALS = [
+  { start: '06:00', end: '11:00' },
+  { start: '13:00', end: '17:00' }
+]
+
+const DEFAULT_DAYS = [1, 2, 3, 4, 5, 6] // T2..T7 (0 = CN)
 
 const emptyProfile = {
   coverImage: '',
@@ -18,13 +24,16 @@ const emptyProfile = {
     name: '',
     address: '',
     location: { type: 'Point', coordinates: [0, 0] }, // [lng, lat]
-    photos: [] // array of URL strings
+    photos: []
   },
   deliveryModes: { atPtGym: true, atClient: false, atOtherGym: false },
   travelPolicy: { enabled: true, freeRadiusKm: 6, maxTravelKm: 20, feePerKm: 10000 },
   areaNote: '',
   availableForNewClients: true,
-  videoIntroUrl: ''
+  videoIntroUrl: '',
+  // 2 field mới (FE quản lý & gửi lên)
+  workingHours: [],
+  defaultBreakMin: 0
 }
 
 const emptyUser = {
@@ -46,24 +55,20 @@ export default function PTProfile() {
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
 
-  // avatar upload (giữ nguyên như cũ)
   const [avatarFile, setAvatarFile] = useState(null)
   const [avatarPreview, setAvatarPreview] = useState('')
 
-  // review
   const [reviewLoading, setReviewLoading] = useState(false)
-  const [latestRequest, setLatestRequest] = useState(null) // {status, ...} | null
+  const [latestRequest, setLatestRequest] = useState(null)
+
+  // === NEW: UI “nhanh” cho Working Hours ===
+  const [whDays, setWhDays] = useState(DEFAULT_DAYS)               // danh sách các dayOfWeek đã chọn
+  const [whIntervals, setWhIntervals] = useState(DEFAULT_INTERVALS) // intervals dùng chung
 
   const setField = (key, value) => setForm(p => ({ ...p, [key]: value }))
   const setPG = (key, value) => setForm(p => ({ ...p, primaryGym: { ...(p.primaryGym || {}), [key]: value } }))
   const setDM = (key, value) => setForm(p => ({ ...p, deliveryModes: { ...(p.deliveryModes || {}), [key]: value } }))
   const setTP = (key, value) => setForm(p => ({ ...p, travelPolicy: { ...(p.travelPolicy || {}), [key]: value } }))
-
-  const [selected, setSelected] = useState({
-    fullAddress: "51 Lê Thiện Trị, Hòa Quý, Đà Nẵng",
-    lat: 15.978692898267385,
-    lng: 108.2508652672883,
-  });
 
   const [lng, lat] = useMemo(
     () => form.primaryGym?.location?.coordinates || [0, 0],
@@ -74,24 +79,18 @@ export default function PTProfile() {
     try {
       const data = await ptApprovalService.getMyLatestRequest()
       setLatestRequest(data || null)
-    } catch {
-      // ignore quietly
-    }
+    } catch {}
   }
 
   useEffect(() => {
-    (async () => {
+    ;(async () => {
       try {
-        // services của bạn đều return res.data => dùng trực tiếp
-        const [uRes, pRes] = await Promise.all([
-          getUserProfile(),               // GET /auth/me
-          ptProfileService.getMyProfile() // GET /pt/profile/me → doc | null
-        ])
+        const [uRes, pRes] = await Promise.all([getUserProfile(), ptProfileService.getMyProfile()])
 
         if (uRes) setUser({ ...emptyUser, ...uRes.data })
 
         if (pRes) {
-          const d = pRes.data
+          const d = pRes.data || {}
           setForm({
             ...emptyProfile,
             ...d,
@@ -108,9 +107,33 @@ export default function PTProfile() {
               photos: Array.isArray(d.primaryGym?.photos) ? d.primaryGym.photos : []
             },
             deliveryModes: { ...emptyProfile.deliveryModes, ...(d.deliveryModes || {}) },
-            travelPolicy: { ...emptyProfile.travelPolicy, ...(d.travelPolicy || {}) }
+            travelPolicy: { ...emptyProfile.travelPolicy, ...(d.travelPolicy || {}) },
+            workingHours: Array.isArray(d.workingHours) ? d.workingHours : [],
+            defaultBreakMin: Number.isFinite(d.defaultBreakMin) ? d.defaultBreakMin : 0
           })
+
+          // Khởi tạo UI “nhanh” từ data có sẵn nếu có
+          if (Array.isArray(d.workingHours) && d.workingHours.length) {
+            const days = d.workingHours
+              .map(w => Number(w?.dayOfWeek))
+              .filter(n => Number.isFinite(n) && n >= 0 && n <= 6)
+            setWhDays([...new Set(days)].sort((a, b) => a - b))
+
+            const firstIntervals = Array.isArray(d.workingHours[0]?.intervals)
+              ? d.workingHours[0].intervals
+              : DEFAULT_INTERVALS
+            setWhIntervals(
+              firstIntervals.map(iv => ({
+                start: String(iv?.start || '').slice(0, 5) || '06:00',
+                end: String(iv?.end || '').slice(0, 5) || '07:00'
+              }))
+            )
+          } else {
+            setWhDays(DEFAULT_DAYS)
+            setWhIntervals(DEFAULT_INTERVALS)
+          }
         }
+
         await loadLatestRequest()
       } catch (e) {
         setError('Failed to load profile.')
@@ -164,16 +187,31 @@ export default function PTProfile() {
         feePerKm: Number(payload.travelPolicy?.feePerKm) || 0
       }
 
+      // NEW: defaultBreakMin
+      payload.defaultBreakMin = Math.max(0, Math.trunc(Number(payload.defaultBreakMin || 0)))
+
+      // NEW: generate workingHours từ UI “nhanh”
+      const hhmm = /^([01]\d|2[0-3]):([0-5]\d)$/
+      const cleanIntervals = []
+        .concat(whIntervals || [])
+        .map(iv => ({ start: String(iv?.start || '').trim(), end: String(iv?.end || '').trim() }))
+        .filter(iv => hhmm.test(iv.start) && hhmm.test(iv.end) && iv.start < iv.end)
+
+      const cleanDays = [...new Set([...(whDays || [])])]
+        .map(n => Number(n))
+        .filter(n => Number.isFinite(n) && n >= 0 && n <= 6)
+        .sort((a, b) => a - b)
+
+      payload.workingHours =
+        cleanDays.length && cleanIntervals.length
+          ? cleanDays.map(day => ({ dayOfWeek: day, intervals: cleanIntervals }))
+          : []
+
       // save song song: user + PTProfile
       const [userRes, ptRes] = await Promise.all([
         updateUserProfile(
-          {
-            name: user.name,
-            gender: user.gender,
-            dob: user.dob,
-            address: user.address
-          },
-          avatarFile // giữ nguyên cơ chế upload avatar
+          { name: user.name, gender: user.gender, dob: user.dob, address: user.address },
+          avatarFile
         ),
         ptProfileService.upsertMyProfile(payload)
       ])
@@ -196,11 +234,9 @@ export default function PTProfile() {
     }
   }
 
-  // Save ≠ Submit
   const handleSubmitReview = async () => {
     try {
       setReviewLoading(true)
-      // tuỳ bạn: có thể bắt buộc save trước khi submit
       await handleSave()
       await ptApprovalService.submitReview()
       toast.success('Submitted for review')
@@ -242,7 +278,25 @@ export default function PTProfile() {
           ? 'bg-red-500/20 text-red-200'
           : 'bg-gray-500/20 text-gray-200'
 
-  const profileLocked = latestRequest?.status === 'pending' // tuỳ chọn khoá input khi pending
+  const profileLocked = latestRequest?.status === 'pending'
+
+  // Helpers cho UI chọn ngày/interval
+  const dayLabel = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7']
+  const toggleDay = (d) =>
+    setWhDays(prev => (prev.includes(d) ? prev.filter(x => x !== d) : [...prev, d].sort((a, b) => a - b)))
+
+  const addCommonInterval = () =>
+    setWhIntervals(prev => [...prev, { start: '06:00', end: '07:00' }])
+
+  const updateCommonInterval = (idx, key, value) =>
+    setWhIntervals(prev => prev.map((iv, i) => (i === idx ? { ...iv, [key]: value } : iv)))
+
+  const removeCommonInterval = (idx) =>
+    setWhIntervals(prev => prev.filter((_, i) => i !== idx))
+
+  const selectWorkdays_234567 = () => setWhDays([1, 2, 3, 4, 5, 6])
+  const selectAllWeek = () => setWhDays([0, 1, 2, 3, 4, 5, 6])
+  const clearDays = () => setWhDays([])
 
   return (
     <PTMainLayout>
@@ -251,7 +305,7 @@ export default function PTProfile() {
         <h2 className="mb-4 text-lg font-semibold text-white">Account</h2>
 
         <div className="grid gap-4 md:grid-cols-[160px_1fr]">
-          {/* Avatar + upload (giữ nguyên) */}
+          {/* Avatar */}
           <div className="flex flex-col items-center gap-3">
             <div className="h-28 w-28 overflow-hidden rounded-full border border-white/10 bg-white/10">
               <img
@@ -330,7 +384,7 @@ export default function PTProfile() {
         </div>
       </div>
 
-      {/* Header row: title + actions */}
+      {/* Header row */}
       <div className="mb-4 flex flex-wrap items-center gap-3 justify-between">
         <div className="flex items-center gap-3">
           <h1 className="text-xl font-semibold text-white">PT Profile</h1>
@@ -540,18 +594,7 @@ export default function PTProfile() {
             </div>
           </div>
 
-          <div className="rounded-xl border border-white/10 p-4">
-            <h3 className="mb-3 text-sm font-semibold text-white">Primary Gym</h3>
-
-            {/* Hiển thị map cơ bản
-            <MapPicker
-              center={form.primaryGym?.location?.coordinates?.length === 2
-                ? form.primaryGym.location.coordinates
-                : [106.700981, 10.776889]}
-              zoom={14}
-              height={340}
-            /> */}
-
+          <div className="mt-3">
             <MapPicker
               value={{
                 address: form.primaryGym?.address || '',
@@ -572,15 +615,6 @@ export default function PTProfile() {
             />
           </div>
 
-
-
-          {/* <Map center={{
-            fullAddress: form.primaryGym?.address || '',
-            lat: form.primaryGym?.location?.coordinates?.[1] || 15.974,
-            lng: form.primaryGym?.location?.coordinates?.[0] || 108.252,
-          }} /> */}
-
-          {/* Coords + photos */}
           <div className="mt-3 grid gap-4 md:grid-cols-3">
             <div>
               <label className="block text-sm text-gray-300">Longitude (lng)</label>
@@ -709,6 +743,116 @@ export default function PTProfile() {
           </div>
         </div>
 
+        {/* NEW: Default Break & Working Hours (QUICK) */}
+        <div className="grid gap-4 md:grid-cols-3">
+          <div>
+            <label className="block text-sm text-gray-300">Nghỉ giữa 2 buổi (phút)</label>
+            <input
+              disabled={profileLocked}
+              type="number"
+              min={0}
+              className="mt-1 w-full rounded-lg border border-white/10 bg-white/5 p-2 text-sm text-gray-200 disabled:opacity-60"
+              value={form.defaultBreakMin ?? 0}
+              onChange={(e) => setField('defaultBreakMin', Number(e.target.value || 0))}
+            />
+          </div>
+
+          <div className="md:col-span-2">
+            <div className="rounded-xl border border-white/10 p-4">
+              <h3 className="mb-3 text-sm font-semibold text-white">Lịch làm việc (nhanh)</h3>
+
+              {/* Chọn ngày trong tuần */}
+              <div className="mb-3">
+                <div className="mb-2 text-xs text-gray-400">Chọn ngày làm trong tuần</div>
+                <div className="flex flex-wrap gap-2">
+                  {[0,1,2,3,4,5,6].map(d => (
+                    <button
+                      key={d}
+                      type="button"
+                      disabled={profileLocked}
+                      onClick={() => toggleDay(d)}
+                      className={`rounded-lg border px-3 py-1 text-sm ${
+                        whDays.includes(d)
+                          ? 'border-indigo-400 bg-indigo-500/20 text-indigo-100'
+                          : 'border-white/10 bg-white/5 text-gray-300'
+                      }`}
+                    >
+                      {dayLabel[d]}
+                    </button>
+                  ))}
+                  <div className="ml-2 flex gap-2">
+                    <button
+                      type="button"
+                      disabled={profileLocked}
+                      onClick={selectWorkdays_234567}
+                      className="rounded-lg border border-white/10 px-3 py-1 text-xs text-gray-300 hover:bg-white/10"
+                    >
+                      Chọn 2-7
+                    </button>
+                    <button
+                      type="button"
+                      disabled={profileLocked}
+                      onClick={selectAllWeek}
+                      className="rounded-lg border border-white/10 px-3 py-1 text-xs text-gray-300 hover:bg-white/10"
+                    >
+                      Chọn CN-7
+                    </button>
+                    <button
+                      type="button"
+                      disabled={profileLocked}
+                      onClick={clearDays}
+                      className="rounded-lg border border-white/10 px-3 py-1 text-xs text-gray-300 hover:bg-white/10"
+                    >
+                      Bỏ chọn
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Intervals dùng chung */}
+              <div>
+                <div className="mb-2 text-xs text-gray-400">Khung giờ áp dụng cho mọi ngày đã chọn</div>
+                {(whIntervals || []).map((iv, idx) => (
+                  <div key={idx} className="mb-2 flex items-center gap-2">
+                    <input
+                      disabled={profileLocked}
+                      type="time"
+                      className="rounded-lg border border-white/10 bg-white/5 p-2 text-sm text-gray-200"
+                      value={iv.start || ''}
+                      onChange={(e) => updateCommonInterval(idx, 'start', e.target.value)}
+                    />
+                    <span className="text-gray-400">—</span>
+                    <input
+                      disabled={profileLocked}
+                      type="time"
+                      className="rounded-lg border border-white/10 bg-white/5 p-2 text-sm text-gray-200"
+                      value={iv.end || ''}
+                      onChange={(e) => updateCommonInterval(idx, 'end', e.target.value)}
+                    />
+                    <button
+                      type="button"
+                      disabled={profileLocked}
+                      onClick={() => removeCommonInterval(idx)}
+                      className="text-xs rounded-lg border border-white/10 px-2 py-1 text-red-200 hover:bg-red-500/10 disabled:opacity-60"
+                    >
+                      Xoá
+                    </button>
+                  </div>
+                ))}
+
+                <button
+                  type="button"
+                  disabled={profileLocked}
+                  onClick={addCommonInterval}
+                  className="rounded-lg border border-white/10 px-2 py-1 text-xs text-gray-200 hover:bg-white/10 disabled:opacity-60"
+                >
+                  + Thêm khung giờ
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Area note & Availability & Video */}
         <div className="grid gap-4 md:grid-cols-3">
           <div className="md:col-span-2">
@@ -749,13 +893,11 @@ export default function PTProfile() {
         </div>
       </form>
 
-      {
-        (message || error) && (
-          <div className={`mt-4 rounded-lg px-3 py-2 text-sm ${message ? 'bg-green-500/20 text-green-200' : 'bg-red-500/20 text-red-200'}`}>
-            {message || error}
-          </div>
-        )
-      }
-    </PTMainLayout >
+      {(message || error) && (
+        <div className={`mt-4 rounded-lg px-3 py-2 text-sm ${message ? 'bg-green-500/20 text-green-200' : 'bg-red-500/20 text-red-200'}`}>
+          {message || error}
+        </div>
+      )}
+    </PTMainLayout>
   )
 }
