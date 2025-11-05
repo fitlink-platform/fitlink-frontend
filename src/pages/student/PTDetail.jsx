@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { getPTDetailPublic } from '~/services/ptProfileService'
 import { getPackagesByPTPublic } from '~/services/packageService'
+import axiosClient from '~/api/axiosClient'
 import {
   FaFacebook, FaInstagram, FaTiktok, FaMapMarkerAlt, FaArrowLeft,
   FaCheckCircle, FaRegClock, FaMedal, FaStar, FaPhoneAlt, FaEnvelope,
@@ -186,7 +187,7 @@ const PTDetail = () => {
   const [selectedPackage, setSelectedPackage] = useState(null)
 
   const load = async () => {
-    try {
+    try {    
       setLoading(true)
       const [pRes, pkRes] = await Promise.all([
         getPTDetailPublic(id),

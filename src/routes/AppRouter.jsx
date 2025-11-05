@@ -13,17 +13,21 @@ import PTList from "~/pages/student/PTList";
 import ManagerUser from "../pages/admin/managerUser/ManagerUser";
 import UserDetail from "../pages/admin/ManagerUser/UserDetail";
 
-import ResetPasswordPage from "~/pages/ResetPasswordPage";
-import ForgotPasswordPage from "~/pages/ForgotPasswordPage";
-import DashboardPage from "~/pages/admin/dashboardAdmin/DashboardPage";
-import PTDashboard from "~/pages/pt/PTDashboard";
+import ResetPasswordPage from '~/pages/ResetPasswordPage'
+import ForgotPasswordPage from '~/pages/ForgotPasswordPage'
+import DashboardPage from '~/pages/admin/dashboardAdmin/DashboardPage'
+import PTDashboard from '~/pages/pt/PTDashboard'
+import PTPackages from '~/pages/pt/PTPackages'
+import PTProfile from '~/pages/pt/PTProfile'
+import PTDetail from '~/pages/student/PTDetail'
+import PaymentResult from '~/pages/payment/PaymentResult'
+import MyCalendar from '~/pages/calendar/MyCalendar'
+import PTStudents from '~/pages/pt/PTStudent'
+import PTListAdmin from '~/pages/admin/managerUser/PTList';
+import StudentListAdmin from '~/pages/admin/managerUser/StudentList';
+import AdminLayout from "~/layouts/AdminLayout";
+import SearchPTs from '~/pages/student/SearchPTs';
 import PTCalendarPage from "~/pages/pt/PTCalendarPage";
-import PTPackages from "~/pages/pt/PTPackages";
-import PTProfile from "~/pages/pt/PTProfile";
-import PTDetail from "~/pages/student/PTDetail";
-import PaymentResult from "~/pages/payment/PaymentResult";
-import MyCalendar from "~/pages/calendar/MyCalendar";
-import PTStudents from "~/pages/pt/PTStudent";
 import PTRequestList from "~/pages/admin/PTRequestList";
 import PTRequestDetail from "~/pages/admin/PTRequestDetail";
 import PTCreatePackage from "~/pages/pt/PTCreatePackage";
@@ -38,7 +42,7 @@ export default function AppRouter() {
       <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
       <Route path="/unauthorized" element={<UnauthorizedPage />} />
       <Route path="/verify-email" element={<VerifyEmail />} />
-      <Route path="/list-pt" element={<PTList />} />
+      <Route path="/list-pt" element={<SearchPTs />} />
       <Route
         path="/profile"
         element={
@@ -56,6 +60,7 @@ export default function AppRouter() {
 
       {/* Trainer - Nguyen */}
       <Route path="/trainer/:id" element={<PTDetail />} />
+      <Route path="/pt/:id" element={<PTDetail />} />
       {/* Admin router */}
       <Route
         path="/admin"
@@ -66,6 +71,26 @@ export default function AppRouter() {
         }
       />
       <Route path="/admin/users" element={<ManagerUser />} />
+      <Route
+        path="/admin/users/pts"
+        element={
+          <PrivateRoute allowedRoles={['admin']}>
+            <AdminLayout>
+              <PTListAdmin />
+            </AdminLayout>
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/admin/users/students"
+        element={
+          <PrivateRoute allowedRoles={['admin']}>
+            <AdminLayout>
+              <StudentListAdmin />
+            </AdminLayout>
+          </PrivateRoute>
+  }
+/>
       <Route path="/admin/users/:id" element={<UserDetail />} />
       <Route path="/pt" element={<Navigate to="/pt/dashboard" replace />} />
       <Route path="/admin/pt-requests" element={<PTRequestList />} />

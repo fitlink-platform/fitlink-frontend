@@ -1,5 +1,12 @@
+import axios from "~/api/axiosClient";
+
+export const ptService = {
+  getAllPTs: async () => {
+    const res = await axios.get("/admin/pts");
+    return res.data;
+  },
+};
 // src/services/ptService.js  (hoặc ptStudentService.js — tên tùy bạn)
-import axios from '~/api/axiosClient'
 
 export const isPTVerified = async () => {
   try {
