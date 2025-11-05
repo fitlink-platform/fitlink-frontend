@@ -348,7 +348,7 @@ export default function SearchPTs() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {pts.map((pt) => (
+            {pts.map((pt) => (              
               <div
                 key={pt._id}
                 className="bg-slate-800 rounded-xl border border-slate-700 shadow-md hover:-translate-y-1 transition transform overflow-hidden"
@@ -374,7 +374,7 @@ export default function SearchPTs() {
                     </p>
                   </div>
                   <button
-                    onClick={() => navigate(`/pt/${pt._id}`)}
+                    onClick={() => navigate(`/pt/${pt.userInfo?._id}`)}              
                     className="mt-4 bg-orange-600 hover:bg-orange-500 text-white font-medium rounded-lg py-2 transition"
                   >
                     View Details

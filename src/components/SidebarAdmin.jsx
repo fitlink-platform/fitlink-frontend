@@ -1,7 +1,8 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, Link } from "react-router-dom";
 import {
   FaTachometerAlt,
   FaUsers,
+  FaDog,
   FaConciergeBell,
   FaBoxOpen,
   FaClipboardList,

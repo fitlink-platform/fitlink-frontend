@@ -31,7 +31,7 @@ export const getAllPTProfilesPublic = async (params = {}) => {
 }
 // Xem thông tin chi tiết của PT (dành cho student)
 export const getPTDetailPublic = async (id) => {
-  const res = await axios.get(`/search/pts/${id}`)
+  const res = await axios.get(`/pt/public/${id}`)
   return res.data
 }
 

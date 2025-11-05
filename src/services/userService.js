@@ -60,3 +60,8 @@ export const getMyAccount = async () => {
   // trả về phần data cho tiện dùng trong FE
   return res.data
 }
+
+export const getAllUsers = async () => {
+  const res = await axios.get('/pt/users');
+return res.data;  
+}

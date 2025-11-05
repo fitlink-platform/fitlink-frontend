@@ -52,8 +52,8 @@ export const resetPassword = async (token, newPassword, confirmPassword) => {
   return res.data;
 };
 
-export const registerStart = async ({ name, phone, password, email }) => {
-  const res = await axios.post('/auth/register/start', { name, phone, password, email });
+export const registerStart = async ({ name, phone, password, email, role }) => {  
+  const res = await axios.post('/auth/register/start', { name, phone, password, email, role });
   return res.data;
 };
 
