@@ -22,6 +22,7 @@ const menuItems = [
       { label: "Student List", to: "/admin/users/students" },
     ],
   },
+  { label: "Xác minh PT", icon: <FaTachometerAlt />, to: "/admin/pt-requests" },
   { label: "Service Management", icon: <FaConciergeBell />, to: "/admin/services" },
   { label: "Product Management", icon: <FaBoxOpen />, to: "/admin/products" },
   { label: "Order Management", icon: <FaClipboardList />, to: "/admin/orders" },
