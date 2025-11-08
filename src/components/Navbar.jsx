@@ -110,6 +110,16 @@ export default function Navbar() {
                 >
                   My Packages
                 </li>
+
+                <li
+                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2"
+                  onClick={() => {
+                    navigate('/training-calendar')
+                    setShowDropdown(false)
+                  }}
+                >
+                  My Training Schedule
+                </li>
                 <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
                   Support
                 </li>
