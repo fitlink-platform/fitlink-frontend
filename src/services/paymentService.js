@@ -1,8 +1,8 @@
 import axios from '~/api/axiosClient'
 
 // 1) init transaction cho 1 package
-export async function initStudentPackageCheckout(packageId) {
-  const { data } = await axios.post(`/student/packages/${packageId}/checkout/init`)
+export async function initStudentPackageCheckout(payload) {
+  const { data } = await axios.post(`/student/packages/checkout/init`, payload)
   return data // { success, data: { transactionId, status, package } }
 }
 
