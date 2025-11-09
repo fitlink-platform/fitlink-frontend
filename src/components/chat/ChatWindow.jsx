@@ -1,9 +1,11 @@
+// src/components/chat/ChatWindow.jsx
 import React, { useEffect, useState, useRef } from "react";
-import socket from "../../utils/socket";
-import axios from "axios";
 import { SendHorizonal } from "lucide-react";
+import { useSocket } from "~/contexts/SocketContext";
+import { getMessagesByRoom } from "~/services/messageService";
 
 const ChatWindow = ({ self, peer, role }) => {
+  const { socket } = useSocket();
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
   const [isTyping, setIsTyping] = useState(false);
@@ -11,7 +13,7 @@ const ChatWindow = ({ self, peer, role }) => {
   const typingTimer = useRef(null);
   const prevLength = useRef(0);
 
-  // Scroll xuống khi có tin nhắn mới
+  // auto scroll
   useEffect(() => {
     if (messages.length > prevLength.current) {
       messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -19,15 +21,15 @@ const ChatWindow = ({ self, peer, role }) => {
     prevLength.current = messages.length;
   }, [messages]);
 
-  // Lắng nghe và tải tin nhắn
+  // join room + listeners
   useEffect(() => {
-    if (!self?._id || !peer?._id) return;
+    if (!socket || !self?._id || !peer?._id) return;
     const roomId = [self._id, peer._id].sort().join("-");
 
     socket.emit("joinRoom", roomId);
 
-    axios
-      .get(`http://localhost:3000/api/messages/${roomId}`)
+    // dùng service load lịch sử
+    getMessagesByRoom(roomId)
       .then((res) => setMessages(res.data.data || []))
       .catch((err) => console.error("❌ Load messages failed:", err));
 
@@ -51,23 +53,19 @@ const ChatWindow = ({ self, peer, role }) => {
       socket.off("receiveMessage", handleReceive);
       socket.off("userTyping", handleTyping);
     };
-  }, [self?._id, peer?._id]);
+  }, [socket, self?._id, peer?._id]);
 
   const handleTypingInput = (e) => {
     setText(e.target.value);
+    if (!socket || !self?._id || !peer?._id) return;
     const roomId = [self._id, peer._id].sort().join("-");
     socket.emit("typing", roomId);
   };
 
   const sendMessage = () => {
-    if (!text.trim()) return;
+    if (!text.trim() || !socket) return;
     const roomId = [self._id, peer._id].sort().join("-");
-    const payload = {
-      room: roomId,
-      sender: self._id,
-      text,
-      senderRole: role,
-    };
+    const payload = { room: roomId, sender: self._id, text, senderRole: role };
     socket.emit("sendMessage", payload);
     setText("");
   };
@@ -96,13 +94,16 @@ const ChatWindow = ({ self, peer, role }) => {
         </div>
       </div>
 
-      {/* Nội dung tin nhắn */}
+      {/* Messages */}
       <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2 bg-gray-50">
         {messages.map((msg, idx) => {
           const senderId = msg.sender?._id || msg.sender || msg.senderId;
           const mine = String(senderId) === String(self._id);
           return (
-            <div key={idx} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
+            <div
+              key={idx}
+              className={`flex ${mine ? "justify-end" : "justify-start"}`}
+            >
               <div
                 className={`px-4 py-2 rounded-2xl max-w-[70%] text-sm shadow-sm ${
                   mine
@@ -118,7 +119,7 @@ const ChatWindow = ({ self, peer, role }) => {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Ô nhập */}
+      {/* Input */}
       <div className="p-4 border-t border-gray-200 flex gap-2 bg-white flex-shrink-0">
         <input
           value={text}

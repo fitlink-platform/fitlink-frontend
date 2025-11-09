@@ -26,6 +26,7 @@ import PaymentResult from '~/pages/payment/PaymentResult'
 import MyCalendar from '~/pages/calendar/MyCalendar'
 import PTStudents from '~/pages/pt/PTStudent'
 import MessagePage from '~/pages/MessagePage'
+import ChatAIPage from '~/pages/AIChatPage'
 
 export default function AppRouter() {
   return (
@@ -51,6 +52,7 @@ export default function AppRouter() {
       <Route path="/news" element={<NewsPage />} />
       <Route path="/contact" element={<ContactPage />} />
       <Route path="/chat/:ptId" element={<MessagePage />} />
+      <Route path="/chat-ai" element={<ChatAIPage />} />
 
       {/* Trainer - Nguyen */}
       <Route path="/trainer/:id" element={<PTDetail />} />

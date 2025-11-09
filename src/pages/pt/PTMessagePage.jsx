@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import { useAuth } from "~/contexts/AuthProvider";
 import ChatSidebar from "~/components/chat/ChatSidebar";
 import ChatWindow from "~/components/chat/ChatWindow";
 import PTMainLayout from "~/layouts/pt/PTMainLayout";
+import { getMyStudents } from "~/services/messageService";
 
 const PTMessagePage = () => {
   const { user: pt } = useAuth();
@@ -12,8 +12,8 @@ const PTMessagePage = () => {
 
   useEffect(() => {
     if (!pt?._id) return;
-    axios
-      .get(`http://localhost:3000/api/pt/me/students`, { withCredentials: true })
+
+    getMyStudents()
       .then((res) => setStudents(res.data.data || res.data || []))
       .catch((err) => console.error("❌ Lỗi khi tải học viên:", err));
   }, [pt?._id]);
