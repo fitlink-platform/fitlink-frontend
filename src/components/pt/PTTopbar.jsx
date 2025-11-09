@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { FaBars, FaUser } from "react-icons/fa";
+import NotificationBell from "~/components/notifications/NotificationBell"; // 👈 thêm
 
 export default function PTTopbar({ onToggleSidebar }) {
   return (
@@ -13,15 +14,14 @@ export default function PTTopbar({ onToggleSidebar }) {
           >
             <FaBars />
           </button>
-          <Link
-            to="/"
-            className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-600"
-          >
+        <Link to="/" className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-600">
             FitLink<span className="text-white"> Coach</span>
           </Link>
         </div>
 
         <div className="flex items-center gap-3">
+          {/* 👇 Chuông thông báo */}
+          <NotificationBell />
           <button className="rounded-full border border-white/10 px-3 py-1.5 text-xs text-gray-300 hover:bg-white/10">
             Help
           </button>
