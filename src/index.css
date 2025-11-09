@@ -19,7 +19,9 @@
     }
   }
 }
-
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-in-out;
+}
 .content-scroll,
 main {
   scrollbar-width: thin;
