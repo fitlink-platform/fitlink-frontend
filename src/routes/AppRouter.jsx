@@ -35,6 +35,7 @@ import PTRequestList from "~/pages/admin/PTRequestList";
 import PTRequestDetail from "~/pages/admin/PTRequestDetail";
 import PTCreatePackage from "~/pages/pt/PTCreatePackage";
 import PTSchedule from "~/pages/pt/PTSchedule";
+import BookingWizard  from "~/pages/booking/BookingWizard";
 import NotificationsPage from "~/pages/student/NotificationsPage";
 
 export default function AppRouter() {
@@ -67,6 +68,9 @@ export default function AppRouter() {
       {/* Trainer - Nguyen */}
       <Route path="/trainer/:id" element={<PTDetail />} />
       <Route path="/pt/:id" element={<PTDetail />} />
+      {/* <Route path="/booking/:id" element={<BookingPage />} />
+       */}
+       <Route path="/booking/:id" element={<BookingWizard />} />
       {/* Admin router */}
       <Route
         path="/admin"

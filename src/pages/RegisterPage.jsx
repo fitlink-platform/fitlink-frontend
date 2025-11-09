@@ -25,12 +25,19 @@ export default function RegisterPage() {
   // role switch + slide
   const [role, setRole] = React.useState('student'); // 'student' | 'pt'
   const [animating, setAnimating] = React.useState(false);
-  // form (Student)
+
+  // form instances tách riêng
   const {
-    register,
-    handleSubmit,
-    getValues,
-    formState: { errors, isSubmitting }
+    register: registerStudent,
+    handleSubmit: handleSubmitStudent,
+    getValues: getValuesStudent,
+    formState: { errors: errorsStudent, isSubmitting: isSubmittingStudent }
+  } = useForm({ resolver: yupResolver(schema) });
+
+  const {
+    register: registerPT,
+    handleSubmit: handleSubmitPT,
+    formState: { errors: errorsPT, isSubmitting: isSubmittingPT }
   } = useForm({ resolver: yupResolver(schema) });
 
   // email countdown (Student)
@@ -40,20 +47,22 @@ export default function RegisterPage() {
 
   React.useEffect(() => {
     if (!emailSent || secondsLeft <= 0) return;
-    const t = setInterval(() => setSecondsLeft((s) => s - 1), 1000);
+    const t = setInterval(() => {
+      setSecondsLeft((s) => (s > 0 ? s - 1 : 0));
+    }, 1000);
     return () => clearInterval(t);
   }, [emailSent, secondsLeft]);
 
   React.useEffect(() => {
     if (resendCooldown <= 0) return;
-    const t = setInterval(() => setResendCooldown((s) => s - 1), 1000);
+    const t = setInterval(() => setResendCooldown((s) => (s > 0 ? s - 1 : 0)), 1000);
     return () => clearInterval(t);
   }, [resendCooldown]);
 
-  // replace your onSubmit with this
-  const onSubmit = async ({ name, phone, password, email }) => {
+  // submit Student
+  const onSubmitStudent = async ({ name, phone, password, email }) => {
     try {
-      await registerStart({ name, phone, password, email, role }); // 👈 add role
+      await registerStart({ name, phone, password, email, role: 'student' });
       setEmailSent(true);
       setSecondsLeft(180);
       setResendCooldown(60);
@@ -63,13 +72,12 @@ export default function RegisterPage() {
     }
   };
 
-
-  // replace your handleResend with this
+  // resend Student
   const handleResend = async () => {
     if (resendCooldown > 0) return;
     try {
-      const { name, phone, password, email } = getValues();
-      await registerStart({ name, phone, password, email, role }); // 👈 add role
+      const { name, phone, password, email } = getValuesStudent();
+      await registerStart({ name, phone, password, email, role: 'student' });
       setSecondsLeft(180);
       setResendCooldown(60);
       toast.success('Verification email re-sent');
@@ -78,6 +86,15 @@ export default function RegisterPage() {
     }
   };
 
+  // submit PT
+  const onSubmitPT = async ({ name, phone, password, email }) => {
+    try {
+      await registerStart({ name, phone, password, email, role: 'pt' });
+      toast.success('Registered as PT. Please complete your profile in Dashboard and submit for approval.');
+    } catch (err) {
+      toast.error(err?.response?.data?.message || 'Registration failed');
+    }
+  };
 
   const fmt = (s) => {
     const m = Math.floor(s / 60);
@@ -90,7 +107,7 @@ export default function RegisterPage() {
     setAnimating(true);
     setTimeout(() => {
       setRole(next);
-      if (next === 'pt') setEmailSent(false);
+      if (next === 'pt') setEmailSent(false); // ẩn UI email student khi chuyển sang PT
       setAnimating(false);
     }, 250);
   };
@@ -129,7 +146,7 @@ export default function RegisterPage() {
             }`}
         >
           {/* PAGE 1: Student (Left = Hero, Right = Student Form) */}
-          <section className="w-1/2 grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch pr-3">
+          <section className="w-1/2 flex-none grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch pr-3">
             {/* Left / Hero */}
             <div className="relative hidden md:flex flex-col justify-end rounded-2xl overflow-hidden bg-[#111] shadow-2xl border border-[#1f1f1f]">
               <img
@@ -163,18 +180,18 @@ export default function RegisterPage() {
               </div>
 
               {!emailSent ? (
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                  <Input label="Full name" name="name" register={register} errors={errors} />
-                  <Input label="Email" name="email" register={register} errors={errors} />
-                  <Input label="Phone number" name="phone" register={register} errors={errors} />
-                  <Input label="Password" name="password" type="password" register={register} errors={errors} />
-                  <Input label="Confirm password" name="confirmPassword" type="password" register={register} errors={errors} />
+                <form onSubmit={handleSubmitStudent(onSubmitStudent)} className="space-y-4">
+                  <Input label="Full name" name="name" register={registerStudent} errors={errorsStudent} />
+                  <Input label="Email" name="email" register={registerStudent} errors={errorsStudent} />
+                  <Input label="Phone number" name="phone" register={registerStudent} errors={errorsStudent} />
+                  <Input label="Password" name="password" type="password" register={registerStudent} errors={errorsStudent} />
+                  <Input label="Confirm password" name="confirmPassword" type="password" register={registerStudent} errors={errorsStudent} />
                   <button
                     type="submit"
-                    disabled={isSubmitting}
+                    disabled={isSubmittingStudent}
                     className="w-full rounded-lg bg-[#ff4d00] hover:bg-[#ff661a] text-white font-semibold py-3 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                   >
-                    {isSubmitting ? 'Sending…' : 'Send verification email'}
+                    {isSubmittingStudent ? 'Sending…' : 'Send verification email'}
                   </button>
                   <p className="text-sm text-center text-gray-400">
                     Already have an account?{' '}
@@ -215,7 +232,7 @@ export default function RegisterPage() {
           </section>
 
           {/* PAGE 2: PT (Left = PT Account Form, Right = PT Profile Basic) */}
-          <section className="w-1/2 grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch pl-3">
+          <section className="w-1/2 flex-none grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch pl-3">
             {/* Left / PT Account Form */}
             <div className="bg-[#1a1a1a] rounded-2xl shadow-2xl border border-[#262626] p-6 md:p-8">
               <div className="mb-6">
@@ -224,20 +241,21 @@ export default function RegisterPage() {
                   After registering, complete your profile in the Dashboard and submit for Admin approval.
                 </p>
               </div>
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                <Input label="Full name" name="name" register={register} errors={errors} />
-                <Input label="Email" name="email" register={register} errors={errors} />
-                <Input label="Phone number" name="phone" register={register} errors={errors} />
-                <Input label="Password" name="password" type="password" register={register} errors={errors} />
-                <Input label="Confirm password" name="confirmPassword" type="password" register={register} errors={errors} />
+              <form onSubmit={handleSubmitPT(onSubmitPT)} className="space-y-4">
+                <Input label="Full name" name="name" register={registerPT} errors={errorsPT} />
+                <Input label="Email" name="email" register={registerPT} errors={errorsPT} />
+                <Input label="Phone number" name="phone" register={registerPT} errors={errorsPT} />
+                <Input label="Password" name="password" type="password" register={registerPT} errors={errorsPT} />
+                <Input label="Confirm password" name="confirmPassword" type="password" register={registerPT} errors={errorsPT} />
 
                 {/* Disabled for now — you’ll wire API later */}
-              // in the PT form button: remove disabled + change label
+                {/* in the PT form button: remove disabled + change label */}
                 <button
                   type="submit"
-                  className="w-full rounded-lg bg-[#ff4d00] hover:bg-[#ff661a] text-white font-semibold py-3 transition-colors"
+                  disabled={isSubmittingPT}
+                  className="w-full rounded-lg bg-[#ff4d00] hover:bg-[#ff661a] text-white font-semibold py-3 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  {isSubmitting ? 'Sending…' : 'Register as PT'}
+                  {isSubmittingPT ? 'Sending…' : 'Register as PT'}
                 </button>
 
               </form>
@@ -294,7 +312,7 @@ function Input({ label, name, register, errors, type = "text" }) {
         {...register(name)}
         className="w-full rounded-lg border border-[#333] bg-[#0e0e0e] text-white placeholder-gray-500 px-3 py-3 focus:outline-none focus:ring-2 focus:ring-[#ff4d00] focus:border-transparent"
       />
-      {errors[name] && <p className="text-red-500 text-sm mt-1">{errors[name].message}</p>}
+      {errors?.[name] && <p className="text-red-500 text-sm mt-1">{errors[name].message}</p>}
     </div>
   );
 }

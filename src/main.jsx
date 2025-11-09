@@ -9,6 +9,7 @@ import { Environment } from "./config/environment.js";
 import { SocketProvider } from "./contexts/SocketContext.jsx";
 import { NotificationProvider } from "./contexts/NotificationContext.jsx";
 import "./index.css";
+import { BookingProvider } from "~/contexts/BookingContext";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
@@ -17,7 +18,9 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         <AuthProvider>
           <SocketProvider>
             <NotificationProvider>
-              <App />
+              <BookingProvider>
+                <App />
+              </BookingProvider>
             </NotificationProvider>
           </SocketProvider>
         </AuthProvider>
