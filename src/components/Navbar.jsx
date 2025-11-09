@@ -1,36 +1,38 @@
-import React, { useEffect, useState, useRef, useContext } from 'react'
-import { FaUser } from 'react-icons/fa'
-import { Link, useNavigate } from 'react-router-dom'
-import { AuthContext } from '~/contexts/AuthContext'
-import { logout } from '~/services/authService'
-import { toast } from 'react-toastify'
+// src/components/Navbar.jsx
+import React, { useEffect, useState, useRef, useContext } from 'react';
+import { FaUser } from 'react-icons/fa';
+import { Link, useNavigate } from 'react-router-dom';
+import { AuthContext } from '~/contexts/AuthContext';
+import { logout } from '~/services/authService';
+import { toast } from 'react-toastify';
+import NotificationBell from '~/components/notifications/NotificationBell'; // 👈 THÊM
 
 export default function Navbar() {
-  const { user } = useContext(AuthContext)
-  const [showDropdown, setShowDropdown] = useState(false)
-  const dropdownRef = useRef()
-  const navigate = useNavigate()
+  const { user } = useContext(AuthContext);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-        setShowDropdown(false)
+        setShowDropdown(false);
       }
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleClickLogout = async () => {
     try {
-      await logout()
-      toast.success('Logout Successful!')
-      navigate('/login')
+      await logout();
+      toast.success('Logout Successful!');
+      navigate('/login');
     } catch (error) {
-      console.error('Logout failed:', error) // xử lý lỗi cụ thể
-      throw error
+      console.error('Logout failed:', error);
+      throw error;
     }
-  }
+  };
 
   return (
     <header className="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between bg-white backdrop-blur-md shadow-xl sticky top-0 z-50 rounded-[10px]">
@@ -50,8 +52,9 @@ export default function Navbar() {
         >
           Home
         </Link>
+        {/* Nếu router của bạn là /programs thì đổi lại cho đúng */}
         <Link
-          to="/services"
+          to="/programs"
           className="relative hover:text-orange-500 transition-colors duration-200 after:content-[''] after:absolute after:w-0 after:h-[2px] after:left-0 after:-bottom-1 after:bg-orange-500 hover:after:w-full after:transition-all after:duration-300"
         >
           Programs
@@ -84,7 +87,11 @@ export default function Navbar() {
 
       {/* USER / LOGIN */}
       {user ? (
-        <div className="relative" ref={dropdownRef}>
+        <div className="flex items-center gap-3 relative" ref={dropdownRef}>
+          {/* 👇 Chuông thông báo */}
+          <NotificationBell />
+
+          {/* Avatar / menu */}
           <FaUser
             className="cursor-pointer text-gray-800 hover:text-orange-500 transition"
             onClick={() => setShowDropdown((prev) => !prev)}
@@ -95,8 +102,8 @@ export default function Navbar() {
                 <li
                   className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                   onClick={() => {
-                    navigate('/profile')
-                    setShowDropdown(false)
+                    navigate('/profile');
+                    setShowDropdown(false);
                   }}
                 >
                   Profile
@@ -104,14 +111,33 @@ export default function Navbar() {
                 <li
                   className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                   onClick={() => {
-                    navigate('/customer/orders')
-                    setShowDropdown(false)
+                    navigate('/customer/orders');
+                    setShowDropdown(false);
                   }}
                 >
                   My Packages
                 </li>
+                <li
+                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                  onClick={() => {
+                    // PT đi /pt/chat, user đi /chat
+                    navigate(user?.role === 'pt' ? '/pt/chat' : '/chat');
+                    setShowDropdown(false);
+                  }}
+                >
+                  My Messages
+                </li>
                 <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
                   Support
+                </li>
+                <li
+                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                  onClick={() => {
+                    navigate('/chat-ai');
+                    setShowDropdown(false);
+                  }}
+                >
+                  AI Assistant
                 </li>
                 <li
                   onClick={handleClickLogout}
@@ -132,5 +158,5 @@ export default function Navbar() {
         </button>
       )}
     </header>
-  )
+  );
 }

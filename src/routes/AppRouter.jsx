@@ -20,9 +20,12 @@ import PTDashboard from '~/pages/pt/PTDashboard'
 import PTPackages from '~/pages/pt/PTPackages'
 import PTProfile from '~/pages/pt/PTProfile'
 import PTDetail from '~/pages/student/PTDetail'
+import PTMessagePage from '~/pages/pt/PTMessagePage'
 import PaymentResult from '~/pages/payment/PaymentResult'
 import MyCalendar from '~/pages/calendar/MyCalendar'
 import PTStudents from '~/pages/pt/PTStudent'
+import MessagePage from '~/pages/MessagePage'
+import ChatAIPage from '~/pages/AIChatPage'
 import PTListAdmin from '~/pages/admin/managerUser/PTList';
 import StudentListAdmin from '~/pages/admin/managerUser/StudentList';
 import AdminLayout from "~/layouts/AdminLayout";
@@ -57,6 +60,8 @@ export default function AppRouter() {
       <Route path="/about" element={<AboutPage />} />
       <Route path="/news" element={<NewsPage />} />
       <Route path="/contact" element={<ContactPage />} />
+      <Route path="/chat/:ptId" element={<MessagePage />} />
+      <Route path="/chat-ai" element={<ChatAIPage />} />
 
       {/* Trainer - Nguyen */}
       <Route path="/trainer/:id" element={<PTDetail />} />
@@ -135,6 +140,10 @@ export default function AppRouter() {
       <Route path="/pt/schedule" element={<PTSchedule />} />
       {/* Student có thể dùng cùng page này nếu muốn, hoặc tách ra layout khác */}
       <Route path="/pt/students" element={<PTStudents />} />
+      <Route path="/pt/chat" element={<PTMessagePage />} />
+
+      <Route path="/chat" element={<MessagePage />} />
+      
 
     </Routes>
   );
