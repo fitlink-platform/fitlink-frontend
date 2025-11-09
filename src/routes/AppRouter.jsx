@@ -32,6 +32,7 @@ import PTRequestList from "~/pages/admin/PTRequestList";
 import PTRequestDetail from "~/pages/admin/PTRequestDetail";
 import PTCreatePackage from "~/pages/pt/PTCreatePackage";
 import PTSchedule from "~/pages/pt/PTSchedule";
+import NotificationsPage from "~/pages/student/NotificationsPage";
 
 export default function AppRouter() {
   return (
@@ -135,6 +136,7 @@ export default function AppRouter() {
       <Route path="/pt/schedule" element={<PTSchedule />} />
       {/* Student có thể dùng cùng page này nếu muốn, hoặc tách ra layout khác */}
       <Route path="/pt/students" element={<PTStudents />} />
+       <Route path="/notifications" element={<NotificationsPage />} />
 
     </Routes>
   );
