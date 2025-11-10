@@ -6,10 +6,20 @@ import { createPackage } from "~/services/packageService";
 import { previewScheduleDraft } from "~/services/scheduleService";
 import PackageSchedulePreview from "~/components/pt/PackageSchedulePreview";
 
+// 👇 NEW: import enum (điều chỉnh path theo project của bạn)
+import { PackageTags, PackageTagLabels } from "~/domain/enum";
+
 // Quy ước 0..6: 0=CN, 1=T2 … 6=T7
 const DOW0 = { 1: "T2", 2: "T3", 3: "T4", 4: "T5", 5: "T6", 6: "T7", 0: "CN" };
 // Thứ tự hiển thị nút: Thứ 2 → CN (Mon-first)
 const UI_DAY_ORDER = [1, 2, 3, 4, 5, 6, 0];
+
+// 👇 NEW: helper cho tags
+const TAG_VALUES = Object.values(PackageTags);
+const TAG_ITEMS = TAG_VALUES.map((v) => ({
+  value: v,
+  label: PackageTagLabels?.[v] || v,
+}));
 
 function PatternEditor({ value, onChange, index, onRemove }) {
   const toggleDay = (day) => {
@@ -41,10 +51,11 @@ function PatternEditor({ value, onChange, index, onRemove }) {
             key={d}
             type="button"
             onClick={() => toggleDay(d)}
-            className={`rounded-full px-3 py-1 text-xs ${value.includes(d)
-              ? "bg-orange-500 text-white"
-              : "border border-white/10 text-gray-300 hover:bg-white/10"
-              }`}
+            className={`rounded-full px-3 py-1 text-xs ${
+              value.includes(d)
+                ? "bg-orange-500 text-white"
+                : "border border-white/10 text-gray-300 hover:bg-white/10"
+            }`}
             title={`dayOfWeek=${d}`}
           >
             {DOW0[d]}
@@ -67,8 +78,6 @@ export default function PTCreatePackage() {
   const [showPreview, setShowPreview] = useState(false);
   const [previewData, setPreviewData] = useState([]);
   const [loadingPreview, setLoadingPreview] = useState(false);
-
-
 
   const navigate = useNavigate();
 
@@ -95,8 +104,12 @@ export default function PTCreatePackage() {
     // Mỗi pattern là mảng số 0..6 (0=CN, 1=T2 … 6=T7)
     recurrence: {
       // ví dụ mặc định: T2-4-6 và T3-5-7
-      daysOfWeek: [[1, 3, 5], [2, 4, 6]],
+      daysOfWeek: [
+        [1, 3, 5],
+        [2, 4, 6],
+      ],
     },
+    // 👇 NEW: dùng enum, mảng rỗng ban đầu
     tags: [],
   });
 
@@ -111,18 +124,25 @@ export default function PTCreatePackage() {
 
   // Clean patterns 0..6
   const cleanedPatterns = (form.recurrence?.daysOfWeek || [])
-    .map(p => Array.from(new Set((p || [])
-      .map(Number)
-      .filter(d => d >= 0 && d <= 6)
-    )).sort((a, b) => a - b))
-    .filter(p => p.length > 0);
+    .map((p) =>
+      Array.from(
+        new Set(
+          (p || [])
+            .map(Number)
+            .filter((d) => d >= 0 && d <= 6)
+        )
+      ).sort((a, b) => a - b)
+    )
+    .filter((p) => p.length > 0);
 
   const handlePreview = async () => {
     setLoadingPreview(true);
     try {
-      const today = new Date(); today.setHours(0, 0, 0, 0);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
       const startDate = new Date(today.getTime() - today.getTimezoneOffset() * 60000)
-        .toISOString().slice(0, 10);
+        .toISOString()
+        .slice(0, 10);
 
       const res = await previewScheduleDraft({
         startDate,
@@ -130,10 +150,10 @@ export default function PTCreatePackage() {
           totalSessions: Number(form.totalSessions),
           sessionDurationMin: Number(form.sessionDurationMin),
           supports: form.supports,
-          recurrence: { daysOfWeek: cleanedPatterns } // 0..6
+          recurrence: { daysOfWeek: cleanedPatterns }, // 0..6
         },
-        carryForward: true,      // bật (default đã là true)
-        spreadWeekly: false      // hoặc true nếu muốn rải đều nhiều tuần
+        carryForward: true, // bật (default đã là true)
+        spreadWeekly: false, // hoặc true nếu muốn rải đều nhiều tuần
       });
 
       setPreviewData(res?.slots || []);
@@ -145,7 +165,6 @@ export default function PTCreatePackage() {
       setLoadingPreview(false);
     }
   };
-
 
   const addPattern = () => {
     setForm((prev) => ({
@@ -173,6 +192,18 @@ export default function PTCreatePackage() {
     });
   };
 
+  // 👇 NEW: toggle cho checkbox tags
+  const toggleTag = (value) => {
+    setForm((s) => {
+      const set = new Set(s.tags || []);
+      if (set.has(value)) set.delete(value);
+      else set.add(value);
+      // đảm bảo chỉ giữ giá trị hợp lệ theo enum
+      const cleaned = Array.from(set).filter((v) => TAG_VALUES.includes(v));
+      return { ...s, tags: cleaned };
+    });
+  };
+
   const onSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
@@ -186,6 +217,9 @@ export default function PTCreatePackage() {
         ).sort((a, b) => a - b)
       )
       .filter((pat) => pat.length > 0);
+
+    // 👇 NEW: lọc tag theo enum trước khi gửi
+    const cleanedTags = (form.tags || []).filter((v) => TAG_VALUES.includes(v));
 
     const payload = {
       name: form.name?.trim(),
@@ -201,7 +235,7 @@ export default function PTCreatePackage() {
       recurrence: {
         daysOfWeek: cleanedPatterns.length ? cleanedPatterns : [[1, 3, 5]],
       },
-      tags: form.tags,
+      tags: cleanedTags, // 👈 enum values
     };
 
     try {
@@ -365,7 +399,7 @@ export default function PTCreatePackage() {
           </div>
         </div>
 
-        {/* isActive + description */}
+        {/* isActive + tags (enum) */}
         <div className="mt-6 grid gap-4 md:grid-cols-2">
           <label className="flex items-center gap-2 text-sm text-gray-300">
             <input
@@ -377,21 +411,50 @@ export default function PTCreatePackage() {
             Active
           </label>
 
+          {/* 👇 NEW: Tags enum (checkbox group) */}
           <div>
-            <label className="mb-1 block text-xs text-gray-400">Tags (comma separated)</label>
-            <input
-              className="w-full rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-sm text-white outline-none"
-              placeholder="weight-loss, muscle, ..."
-              onChange={(e) =>
-                setForm((s) => ({
-                  ...s,
-                  tags: e.target.value
-                    .split(",")
-                    .map((x) => x.trim())
-                    .filter(Boolean),
-                }))
-              }
-            />
+            <div className="mb-1 block text-xs text-gray-400">Tags</div>
+            <div className="flex flex-wrap gap-2">
+              {TAG_ITEMS.map((t) => {
+                const checked = (form.tags || []).includes(t.value);
+                return (
+                  <label
+                    key={t.value}
+                    className={`cursor-pointer rounded-full px-3 py-1 text-xs border ${
+                      checked
+                        ? "bg-orange-500 text-white border-orange-500"
+                        : "border-white/10 text-gray-300 hover:bg-white/10"
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      className="sr-only"
+                      checked={checked}
+                      onChange={() => toggleTag(t.value)}
+                    />
+                    {t.label}
+                  </label>
+                );
+              })}
+            </div>
+
+            {/* tiện ích nhỏ */}
+            <div className="mt-2 flex gap-2">
+              <button
+                type="button"
+                onClick={() => setForm((s) => ({ ...s, tags: TAG_VALUES.slice(0, 3) }))} // ví dụ chọn nhanh 3 tag đầu
+                className="rounded-md border border-white/10 px-2 py-1 text-xs text-gray-300 hover:bg-white/10"
+              >
+                Quick pick
+              </button>
+              <button
+                type="button"
+                onClick={() => setForm((s) => ({ ...s, tags: [] }))}
+                className="rounded-md border border-white/10 px-2 py-1 text-xs text-gray-300 hover:bg-white/10"
+              >
+                Clear
+              </button>
+            </div>
           </div>
         </div>
 
@@ -438,6 +501,7 @@ export default function PTCreatePackage() {
           </button>
         </div>
       </form>
+
       {showPreview && (
         <PackageSchedulePreview
           open={showPreview}
@@ -446,7 +510,6 @@ export default function PTCreatePackage() {
           startDate={new Date().toISOString().slice(0, 10)}
         />
       )}
-
     </PTMainLayout>
   );
 }

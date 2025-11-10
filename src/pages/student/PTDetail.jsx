@@ -9,12 +9,13 @@ import {
 } from 'react-icons/fa'
 import PackageDetailModal from '~/components/student/PackageDetailModel'
 import Map from '~/components/Map'
+import { toast } from 'react-toastify'
 
 // =============== Helpers ===============
 const formatVND = (n) =>
   typeof n === 'number' ? n.toLocaleString('vi-VN')
-  : typeof n === 'string' && !Number.isNaN(Number(n)) ? Number(n).toLocaleString('vi-VN')
-  : '-'
+    : typeof n === 'string' && !Number.isNaN(Number(n)) ? Number(n).toLocaleString('vi-VN')
+      : '-'
 
 const Section = ({ title, icon, right, children, className = '' }) => (
   <section className={`bg-slate-900/70 backdrop-blur rounded-2xl shadow-lg p-5 md:p-6 border border-slate-800 ${className}`}>
@@ -63,11 +64,10 @@ const DeliveryPills = ({ modes }) => {
       {list.map((it) => (
         <span
           key={it.key}
-          className={`px-3 py-1 rounded-full text-sm border ${
-            modes?.[it.key]
-              ? 'bg-emerald-900/30 text-emerald-200 border-emerald-700'
-              : 'bg-slate-800/60 text-slate-400 border-slate-700'
-          }`}
+          className={`px-3 py-1 rounded-full text-sm border ${modes?.[it.key]
+            ? 'bg-emerald-900/30 text-emerald-200 border-emerald-700'
+            : 'bg-slate-800/60 text-slate-400 border-slate-700'
+            }`}
         >
           {it.label}
         </span>
@@ -88,7 +88,7 @@ const SocialLinks = ({ socials }) => {
     <div className="flex items-center gap-3">
       {items.map((it) => (
         <a key={it.key} href={it.href} target="_blank" rel="noopener noreferrer"
-           className="text-slate-400 hover:text-slate-100 transition">
+          className="text-slate-400 hover:text-slate-100 transition">
           {it.icon}
         </a>
       ))}
@@ -151,7 +151,7 @@ const CertItem = ({ c }) => (
     </div>
     {c?.url && (
       <a href={c.url} target="_blank" rel="noopener noreferrer"
-         className="text-indigo-300 hover:underline text-sm">View →</a>
+        className="text-indigo-300 hover:underline text-sm">View →</a>
     )}
   </div>
 )
@@ -187,7 +187,7 @@ const PTDetail = () => {
   const [selectedPackage, setSelectedPackage] = useState(null)
 
   const load = async () => {
-    try {    
+    try {
       setLoading(true)
       const [pRes, pkRes] = await Promise.all([
         getPTDetailPublic(id),
@@ -297,12 +297,30 @@ const PTDetail = () => {
             </div>
           </div>
           <div className="flex flex-col items-start md:items-end gap-3">
-            <SocialLinks socials={ptDetail?.socials} />
+
+             
+            <button
+              onClick={() => {
+                if (!packages?.length) {
+                  toast.warn('This trainer has no available packages to book.');
+                  return;
+                }
+                console.log("PTDetail", ptDetail);
+                
+                navigate(`/booking/${id}`); // không truyền packageId, chọn ở booking
+              }}
+              className="mt-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white px-5 py-2.5 rounded-lg font-semibold shadow"
+            >
+              Book
+            </button>
             <div className="grid grid-cols-3 gap-4 w-full md:w-[400px]">
+
               <Stat label="Experience" value={`${ptDetail?.yearsExperience ?? 0} years`} />
               <Stat label="Specialties" value={`${(ptDetail?.specialties || []).length}`} />
               <Stat label="Packages" value={`${packages?.length || 0}`} />
+
             </div>
+
           </div>
         </div>
       </div>
@@ -402,7 +420,7 @@ const PTDetail = () => {
               {Array.isArray(gym?.photos) && gym.photos.length > 0 ? (
                 <div className="grid grid-cols-3 gap-2 pt-2">
                   {gym.photos.slice(0, 6).map((url, i) => (
-                    <img key={i} src={url} alt={`Gym photo ${i+1}`} className="w-full h-20 object-cover rounded-lg border border-slate-800" />
+                    <img key={i} src={url} alt={`Gym photo ${i + 1}`} className="w-full h-20 object-cover rounded-lg border border-slate-800" />
                   ))}
                 </div>
               ) : null}

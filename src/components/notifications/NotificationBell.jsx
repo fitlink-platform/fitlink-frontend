@@ -1,21 +1,32 @@
 // src/components/NotificationBell.jsx
-import { useState } from "react";
+import { useEffect, useRef } from "react";
 import { useNotification } from "~/contexts/NotificationContext";
 
-export default function NotificationBell() {
+export default function NotificationBell({ isOpen, onOpen, onClose }) {
   const { items, unread, markAllRead } = useNotification();
-  const [open, setOpen] = useState(false);
+  const bellRef = useRef();
+
+  // Đóng chuông khi click ra ngoài
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (bellRef.current && !bellRef.current.contains(e.target)) {
+        onClose && onClose();
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [onClose]);
 
   return (
-    <div className="relative">
+    <div className="relative" ref={bellRef}>
       <button
-        onClick={() => setOpen((o) => !o)}
+        onClick={() => (isOpen ? onClose() : onOpen())}
         className="relative p-2 rounded-full hover:bg-gray-100"
         aria-label="Notifications"
       >
         {/* icon bell */}
         <svg viewBox="0 0 24 24" className="w-6 h-6 text-gray-700 fill-current">
-          <path d="M12 2a6 6 0 00-6 6v3.586L4.293 13.293A1 1 0 005 15h14a1 1 0 00.707-1.707L18 11.586V8a6 6 0 00-6-6zm0 20a3 3 0 01-3-3h6a3 3 0 01-3 3z"/>
+          <path d="M12 2a6 6 0 00-6 6v3.586L4.293 13.293A1 1 0 005 15h14a1 1 0 00.707-1.707L18 11.586V8a6 6 0 00-6-6zm0 20a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
         </svg>
         {unread > 0 && (
           <span className="absolute -top-1 -right-1 text-[10px] bg-red-500 text-white rounded-full px-1.5">
@@ -24,20 +35,31 @@ export default function NotificationBell() {
         )}
       </button>
 
-      {open && (
+      {isOpen && (
         <div className="absolute right-0 mt-2 w-96 max-h-[70vh] overflow-auto rounded-xl border bg-white shadow-lg z-50">
           <div className="flex items-center justify-between px-3 py-2 border-b">
             <span className="font-semibold">Thông báo</span>
-            <button onClick={markAllRead} className="text-sm text-blue-600 hover:underline">
+            <button
+              onClick={markAllRead}
+              className="text-sm text-blue-600 hover:underline"
+            >
               Đánh dấu đã đọc
             </button>
           </div>
           <ul className="divide-y">
-            {items.length === 0 && <li className="p-4 text-sm text-gray-500">Không có thông báo</li>}
+            {items.length === 0 && (
+              <li className="p-4 text-sm text-gray-500">
+                Không có thông báo
+              </li>
+            )}
             {items.map((n) => (
               <li key={n.id || n._id} className="p-3 hover:bg-gray-50">
                 <div className="flex items-start gap-2">
-                  <span className={`mt-1 h-2 w-2 rounded-full ${n.read ? "bg-gray-300" : "bg-blue-500"}`} />
+                  <span
+                    className={`mt-1 h-2 w-2 rounded-full ${
+                      n.read ? "bg-gray-300" : "bg-blue-500"
+                    }`}
+                  />
                   <div className="flex-1">
                     <div className="font-medium">{n.title}</div>
                     <div className="text-sm text-gray-600">{n.message}</div>
