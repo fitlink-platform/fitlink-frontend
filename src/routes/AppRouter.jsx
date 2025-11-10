@@ -38,6 +38,8 @@ import PTCreatePackage from "~/pages/pt/PTCreatePackage";
 import PTSchedule from "~/pages/pt/PTSchedule";
 import BookingWizard from "~/pages/booking/BookingWizard";
 import NotificationsPage from "~/pages/student/NotificationsPage";
+import PTPackageDetail from "~/pages/pt/PTPackageDetail";
+import PTPackageEdit from "~/pages/pt/PTPackageEdit";
 
 export default function AppRouter() {
   return (
@@ -146,6 +148,23 @@ export default function AppRouter() {
           </PrivateRoute>
         }
       />
+      <Route
+        path="/pt/packages/:packageId"
+        element={
+          <PrivateRoute allowedRoles={["pt"]}>
+            <PTPackageDetail />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/pt/packages/:packageId/edit"
+        element={
+          <PrivateRoute allowedRoles={["pt"]}>
+            <PTPackageEdit />
+          </PrivateRoute>
+        }
+      />
+
       <Route path="/pt/packages/new" element={<PrivateRoute allowedRoles={["pt"]}><PTCreatePackage /></PrivateRoute>} />
       <Route
         path="/pt/profile"
@@ -176,6 +195,8 @@ export default function AppRouter() {
           </PrivateRoute>
         }
       />
+
+      <Route path="/chat" element={<MessagePage />} />
 
 
     </Routes>

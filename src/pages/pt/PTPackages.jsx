@@ -136,7 +136,7 @@ export default function PTPackages() {
                   </tr>
                 </thead>
                 <tbody>
-                  {items.map((p) => (
+                  {items.map((p) => (   
                     <tr key={p._id} className="border-t border-white/5">
                       <td className="px-3 py-2 text-white">{p.name}</td>
                       <td className="px-3 py-2 text-gray-300">{p.totalSessions}</td>
@@ -151,7 +151,7 @@ export default function PTPackages() {
                           {p.isActive ? "Active" : "Hidden"}
                         </span>
                       </td>
-                      <td className="px-3 py-2 text-right">
+                      <td className="px-3 py-2 text-right">                                          
                         <Link
                           to={`/pt/packages/${p._id}`}
                           className="rounded-lg border border-white/10 px-3 py-1 text-xs text-gray-300 hover:bg-white/10"
