@@ -20,6 +20,7 @@ import PTDashboard from '~/pages/pt/PTDashboard'
 import PTPackages from '~/pages/pt/PTPackages'
 import PTProfile from '~/pages/pt/PTProfile'
 import PTDetail from '~/pages/student/PTDetail'
+import PTMessagePage from '~/pages/pt/PTMessagePage'
 import PaymentResult from '~/pages/payment/PaymentResult'
 import MyCalendar from '~/pages/calendar/MyCalendar'
 import PTStudents from '~/pages/pt/PTStudent'
@@ -33,6 +34,11 @@ import PTRequestDetail from '~/pages/admin/PTRequestDetail'
 import PTCreatePackage from '~/pages/pt/PTCreatePackage'
 import PTSchedule from '~/pages/pt/PTSchedule'
 import TrainingCalendar from '~/components/TrainingCalendar'
+import MessagePage from '~/pages/MessagePage'
+import ChatAIPage from '~/pages/AIChatPage'
+import BookingWizard from '~/pages/booking/BookingWizard'
+import NotificationsPage from '~/pages/student/NotificationsPage'
+
 export default function AppRouter() {
   return (
     <Routes>
@@ -58,10 +64,15 @@ export default function AppRouter() {
       <Route path="/about" element={<AboutPage />} />
       <Route path="/news" element={<NewsPage />} />
       <Route path="/contact" element={<ContactPage />} />
+      <Route path="/chat/:ptId" element={<MessagePage />} />
+      <Route path="/chat-ai" element={<ChatAIPage />} />
 
       {/* Trainer - Nguyen */}
       <Route path="/trainer/:id" element={<PTDetail />} />
       <Route path="/pt/:id" element={<PTDetail />} />
+      {/* <Route path="/booking/:id" element={<BookingPage />} />
+       */}
+      <Route path="/booking/:id" element={<BookingWizard />} />
       {/* Admin router */}
       <Route
         path="/admin"
@@ -143,6 +154,10 @@ export default function AppRouter() {
       <Route path="/pt/schedule" element={<PTSchedule />} />
       {/* Student có thể dùng cùng page này nếu muốn, hoặc tách ra layout khác */}
       <Route path="/pt/students" element={<PTStudents />} />
+      <Route path="/notifications" element={<NotificationsPage />} />
+      <Route path="/pt/chat" element={<PTMessagePage />} />
+
+      <Route path="/chat" element={<MessagePage />} />
     </Routes>
   )
 }

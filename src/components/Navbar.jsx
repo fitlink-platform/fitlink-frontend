@@ -1,9 +1,11 @@
+// src/components/Navbar.jsx
 import React, { useEffect, useState, useRef, useContext } from 'react'
 import { FaUser } from 'react-icons/fa'
 import { Link, useNavigate } from 'react-router-dom'
 import { AuthContext } from '~/contexts/AuthContext'
 import { logout } from '~/services/authService'
 import { toast } from 'react-toastify'
+import NotificationBell from '~/components/notifications/NotificationBell' // 👈 THÊM
 
 export default function Navbar() {
   const { user } = useContext(AuthContext)
@@ -27,7 +29,7 @@ export default function Navbar() {
       toast.success('Logout Successful!')
       navigate('/login')
     } catch (error) {
-      console.error('Logout failed:', error) // xử lý lỗi cụ thể
+      console.error('Logout failed:', error)
       throw error
     }
   }
@@ -50,8 +52,9 @@ export default function Navbar() {
         >
           Home
         </Link>
+        {/* Nếu router của bạn là /programs thì đổi lại cho đúng */}
         <Link
-          to="/services"
+          to="/programs"
           className="relative hover:text-orange-500 transition-colors duration-200 after:content-[''] after:absolute after:w-0 after:h-[2px] after:left-0 after:-bottom-1 after:bg-orange-500 hover:after:w-full after:transition-all after:duration-300"
         >
           Programs
@@ -84,7 +87,11 @@ export default function Navbar() {
 
       {/* USER / LOGIN */}
       {user ? (
-        <div className="relative" ref={dropdownRef}>
+        <div className="flex items-center gap-3 relative" ref={dropdownRef}>
+          {/* 👇 Chuông thông báo */}
+          <NotificationBell />
+
+          {/* Avatar / menu */}
           <FaUser
             className="cursor-pointer text-gray-800 hover:text-orange-500 transition"
             onClick={() => setShowDropdown((prev) => !prev)}
@@ -120,8 +127,27 @@ export default function Navbar() {
                 >
                   My Training Schedule
                 </li>
+                <li
+                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                  onClick={() => {
+                    // PT đi /pt/chat, user đi /chat
+                    navigate(user?.role === 'pt' ? '/pt/chat' : '/chat')
+                    setShowDropdown(false)
+                  }}
+                >
+                  My Messages
+                </li>
                 <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
                   Support
+                </li>
+                <li
+                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                  onClick={() => {
+                    navigate('/chat-ai')
+                    setShowDropdown(false)
+                  }}
+                >
+                  AI Assistant
                 </li>
                 <li
                   onClick={handleClickLogout}
