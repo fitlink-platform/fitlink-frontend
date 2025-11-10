@@ -2,7 +2,7 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import {
   FaHome, FaUsers, FaCalendarAlt, FaDumbbell, FaComments,
-  FaWallet, FaChartPie, FaSignOutAlt, FaBoxOpen, FaUser, FaChevronLeft, FaChevronRight
+  FaWallet, FaChartPie, FaSignOutAlt, FaBoxOpen, FaUser, FaChevronLeft, FaChevronRight, FaFileAlt,
 } from "react-icons/fa";
 import { logout } from "~/services/authService";
 import { toast } from "react-toastify";
@@ -90,6 +90,7 @@ export default function PTSidebar({
           <SideItem to="/pt/dashboard" icon={FaHome} label="Overview" onClick={onClose} collapsed={collapsed} />
           <SideItem to="/pt/students" icon={FaUsers} label="Students" onClick={onClose} collapsed={collapsed} />
           <SideItem to="/pt/packages" icon={FaBoxOpen} label="Packages" onClick={onClose} collapsed={collapsed} />
+          <SideItem to="/pt/materials" icon={FaFileAlt} label="Materials" onClick={onClose} collapsed={collapsed} />
           <SideItem to="/pt/profile" icon={FaUser} label="Profile" onClick={onClose} collapsed={collapsed} />
           <SideItem to="/pt/schedule" icon={FaCalendarAlt} label="Schedule" onClick={onClose} collapsed={collapsed} />
           <SideItem to="/pt/workouts" icon={FaDumbbell} label="Workouts" onClick={onClose} collapsed={collapsed} />
