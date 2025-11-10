@@ -10,7 +10,7 @@ export default function BMIFloatingButton() {
             {/* 🧮 Nút mở BMI — luôn nằm ở góc phải dưới */}
             <button
                 onClick={() => setIsOpen(true)}
-                className="fixed bottom-6 right-6 bg-orange-600 text-white p-4 rounded-full shadow-lg hover:bg-orange-700 transition duration-300 z-40"
+                className="fixed bottom-6 right-24 bg-orange-600 text-white p-4 rounded-full shadow-lg hover:bg-orange-700 transition duration-300 z-40"
             >
                 <Calculator className="w-6 h-6" />
             </button>

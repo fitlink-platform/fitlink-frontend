@@ -31,6 +31,7 @@ import StudentListAdmin from '~/pages/admin/managerUser/StudentList';
 import AdminLayout from "~/layouts/AdminLayout";
 import SearchPTs from '~/pages/student/SearchPTs';
 import PTCalendarPage from "~/pages/pt/PTCalendarPage";
+import PTMaterialsPage from "~/pages/pt/PTMaterialsPage";
 import PTRequestList from "~/pages/admin/PTRequestList";
 import PTRequestDetail from "~/pages/admin/PTRequestDetail";
 import PTCreatePackage from "~/pages/pt/PTCreatePackage";
@@ -154,6 +155,11 @@ export default function AppRouter() {
           </PrivateRoute>
         }
       />
+      <Route path="/pt/materials" element={
+        <PrivateRoute allowedRoles={["pt"]}>
+          <PTMaterialsPage />
+        </PrivateRoute>
+      } />
       <Route path="/payment/result" element={<PaymentResult />} />
 
       {/* ... */}
