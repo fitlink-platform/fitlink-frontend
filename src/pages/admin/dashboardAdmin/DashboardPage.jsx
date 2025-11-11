@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import SidebarAdmin from "~/components/SidebarAdmin";
 import axiosClient from "~/api/axiosClient";
+import { Link } from "react-router-dom";
 
 function StatCard({ title, value }) {
   return (
@@ -164,6 +165,7 @@ export default function DashboardPage() {
                   <th className="p-3 text-left">Experience</th>
                   <th className="p-3 text-left">Rating</th>
                   <th className="p-3 text-left">Status</th>
+                  <th className="p-3 text-left">Actions</th> {/* Thêm cột hành động */}
                 </tr>
               </thead>
               <tbody>
@@ -184,11 +186,19 @@ export default function DashboardPage() {
                       <td className="p-3">
                         <StatusTag verified={pt.verified} />
                       </td>
+                      <td className="p-3">
+                        <Link 
+                        to={`/admin/feedbacks/${pt.id}`} 
+                        className="bg-blue-500 text-white py-1 px-3 rounded hover:bg-blue-600"
+                        >
+                        Feedback
+                        </Link>
+                      </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={6} className="text-center p-4 text-gray-400">
+                    <td colSpan={7} className="text-center p-4 text-gray-400">
                       No PTs available
                     </td>
                   </tr>

@@ -39,3 +39,15 @@ export const markFeedbackSent = async (id) => {
   const res = await axiosClient.patch(`/notifications/${id}/feedback-sent`);
   return res.data;
 };
+
+export const getFeedbackByPT = async (ptId) => {
+  const res = await axiosClient.get(`/feedbacks/pt/${ptId}`); // Đảm bảo ptId được truyền vào đúng.
+  console.log("📬 Feedback của PT:", res.data);
+  return res.data; // Trả về dữ liệu feedback
+};
+
+export const getAllFeedbacks = async () => {
+  const res = await axiosClient.get('/feedbacks');
+  console.log("📬 Tất cả Feedbacks:", res.data);
+  return res.data; // Trả về tất cả dữ liệu feedback
+};

@@ -2,7 +2,7 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import {
   FaHome, FaUsers, FaCalendarAlt, FaDumbbell, FaComments,
-  FaWallet, FaChartPie, FaSignOutAlt, FaBoxOpen, FaUser, FaChevronLeft, FaChevronRight, FaFileAlt,
+  FaWallet, FaChartPie, FaSignOutAlt, FaBoxOpen, FaUser, FaChevronLeft, FaChevronRight, FaFileAlt, FaStar,
 } from "react-icons/fa";
 import { logout } from "~/services/authService";
 import { toast } from "react-toastify";
@@ -97,6 +97,8 @@ export default function PTSidebar({
           <SideItem to="/pt/chat" icon={FaComments} label="Messages" onClick={onClose} collapsed={collapsed} />
           <SideItem to="/pt/wallet" icon={FaWallet} label="Wallet" onClick={onClose} collapsed={collapsed} />
           <SideItem to="/pt/analytics" icon={FaChartPie} label="Analytics" onClick={onClose} collapsed={collapsed} />
+           <SideItem to="/pt/feedback" icon={FaStar} label="Feedback" onClick={onClose} collapsed={collapsed} /> 
+
         </nav>
 
         {/* Footer actions */}

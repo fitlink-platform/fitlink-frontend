@@ -40,6 +40,8 @@ import BookingWizard from "~/pages/booking/BookingWizard";
 import NotificationsPage from "~/pages/student/NotificationsPage";
 import PTPackageDetail from "~/pages/pt/PTPackageDetail";
 import PTPackageEdit from "~/pages/pt/PTPackageEdit";
+import PTFeedbackPage from '~/pages/pt/PTFeedbackPage';
+import AdminFeedbackPage from '~/pages/admin/AdminFeedbackPage';
 
 export default function AppRouter() {
   return (
@@ -198,7 +200,22 @@ export default function AppRouter() {
 
       <Route path="/chat" element={<MessagePage />} />
 
-
+      <Route
+        path="/pt/feedback"
+        element={
+          <PrivateRoute allowedRoles={["pt"]}>
+            <PTFeedbackPage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/admin/feedbacks/:id"
+        element={
+        <PrivateRoute allowedRoles={["admin"]}>
+      <AdminFeedbackPage />
+    </PrivateRoute>
+    }
+      />
     </Routes>
   );
 }
