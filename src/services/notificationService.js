@@ -4,9 +4,15 @@ import axiosClient from '~/api/axiosClient';
 /**
  * 📬 Lấy danh sách thông báo của người dùng hiện tại
  */
-export const getNotifications = async () => {
+/*export const getNotifications = async () => {
   const res = await axiosClient.get('/notifications');
   return res.data;
+};*/
+export const getNotifications = async () => {
+  const res = await axiosClient.get('/notifications');
+  console.log("📬 Raw notifications API:", res.data);
+
+  return res.data.items || [];  
 };
 
 /**

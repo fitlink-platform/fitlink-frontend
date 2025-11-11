@@ -88,7 +88,6 @@ export default function PTSchedule() {
     try {
       const res = await getMySessions();
       const data = res?.data || [];
-
       const mapped = data.map((s) => {
         const start = new Date(s.startTime);
         const end = new Date(s.endTime);
@@ -99,13 +98,29 @@ export default function PTSchedule() {
         const startStr = `${pad(start.getHours())}:${pad(start.getMinutes())}`;
         const endStr = `${pad(end.getHours())}:${pad(end.getMinutes())}`;
 
-        return {
+        /*return {
           ...s,
           date: toISODate(start),
           start: startStr,
           end: endStr,
           pattern: ["real"],
-        };
+        };*/
+        return {
+  _id: s._id,
+  title: s.title,
+  status: s.status,
+  attendance: s.attendance,
+  pt: s.pt,
+  student: s.student, // ✅ giữ nguyên nguyên object populate
+  studentNote: s.studentNote,
+  ptNote: s.ptNote,
+  startTime: s.startTime,
+  endTime: s.endTime,
+  date: toISODate(start),
+  start: startStr,
+  end: endStr,
+  pattern: ["real"],
+};
       });
 
       setSlots(mapped);
@@ -369,9 +384,9 @@ export default function PTSchedule() {
                           <div className="text-[10px] text-gray-200">
                             {s.start}–{s.end}
                           </div>
-                          {s.student?.fullName && (
-                            <div className="text-[10px] italic truncate">
-                              👤 {s.student.fullName}
+                          {(s.student?.fullName || s.student?.name) && (
+                            <div className="text-[10px] italic truncate text-cyan-200 font-medium drop-shadow">
+                              👤 {s.student.fullName || s.student.name}
                             </div>
                           )}
                           {s.status && (

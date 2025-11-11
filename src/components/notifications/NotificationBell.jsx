@@ -64,13 +64,8 @@ export default function NotificationBell({ isOpen, onOpen, onClose }) {
                     <div className="font-medium">{n.title}</div>
                     <div className="text-sm text-gray-600">{n.message}</div>
                     {n.data?.url && (
-                      <a
-                        href={n.data.url}
-                        className="text-sm text-blue-600 hover:underline"
-                      >
-                        Xem chi tiết
-                      </a>
-                    )}
+                      <a href={n.data.url} className="text-sm text-blue-600 hover:underline">Xem chi tiết</a>
+                    )}               
                     <div className="text-xs text-gray-400 mt-0.5">
                       {new Date(n.createdAt).toLocaleString()}
                     </div>
@@ -79,6 +74,18 @@ export default function NotificationBell({ isOpen, onOpen, onClose }) {
               </li>
             ))}
           </ul>
+           {/* 🔸 Nút View all notifications ở cuối */}
+          {items.length > 0 && (
+            <div className="sticky bottom-0 text-center py-2 border-t bg-gray-50">
+              <a
+                href="/notifications"
+                onClick={() => setOpen(false)}
+                className="inline-block text-sm font-semibold text-orange-500 hover:text-orange-600 hover:underline transition-colors"
+              >
+                View all notifications →
+              </a>
+            </div>
+          )}
         </div>
       )}
     </div>
