@@ -6,6 +6,7 @@ import ptProfileService from '~/services/ptProfileService'
 import ptApprovalService from '~/services/ptApprovalService'
 import { getMyAccount as getUserProfile, updateProfile as updateUserProfile } from '~/services/userService'
 import MapPicker from '~/components/MapPicker'
+import { cleanWorkingHours } from '~/utils/helper'
 
 const DEFAULT_INTERVALS = [
   { start: '06:00', end: '11:00' },
@@ -79,11 +80,11 @@ export default function PTProfile() {
     try {
       const data = await ptApprovalService.getMyLatestRequest()
       setLatestRequest(data || null)
-    } catch {}
+    } catch { }
   }
 
   useEffect(() => {
-    ;(async () => {
+    ; (async () => {
       try {
         const [uRes, pRes] = await Promise.all([getUserProfile(), ptProfileService.getMyProfile()])
 
@@ -91,6 +92,10 @@ export default function PTProfile() {
 
         if (pRes) {
           const d = pRes.data || {}
+          console.log("PT Profile: ", d);
+
+          const cleanedWH = cleanWorkingHours(d.workingHours)
+
           setForm({
             ...emptyProfile,
             ...d,
@@ -108,26 +113,23 @@ export default function PTProfile() {
             },
             deliveryModes: { ...emptyProfile.deliveryModes, ...(d.deliveryModes || {}) },
             travelPolicy: { ...emptyProfile.travelPolicy, ...(d.travelPolicy || {}) },
-            workingHours: Array.isArray(d.workingHours) ? d.workingHours : [],
+            workingHours: cleanedWH, // ⬅️ dùng bản đã làm sạch
             defaultBreakMin: Number.isFinite(d.defaultBreakMin) ? d.defaultBreakMin : 0
           })
 
-          // Khởi tạo UI “nhanh” từ data có sẵn nếu có
-          if (Array.isArray(d.workingHours) && d.workingHours.length) {
-            const days = d.workingHours
-              .map(w => Number(w?.dayOfWeek))
-              .filter(n => Number.isFinite(n) && n >= 0 && n <= 6)
-            setWhDays([...new Set(days)].sort((a, b) => a - b))
+          // Khởi tạo UI “nhanh” từ workingHours đã làm sạch
+          if (cleanedWH.length) {
+            const days = cleanedWH.map(w => w.dayOfWeek)
+            setWhDays([...new Set(days)].sort((a, b) => a - b))       // ⬅️ chỉ có ngày có interval
 
-            const firstIntervals = Array.isArray(d.workingHours[0]?.intervals)
-              ? d.workingHours[0].intervals
+            const firstIntervals = cleanedWH[0].intervals?.length
+              ? cleanedWH[0].intervals
               : DEFAULT_INTERVALS
-            setWhIntervals(
-              firstIntervals.map(iv => ({
-                start: String(iv?.start || '').slice(0, 5) || '06:00',
-                end: String(iv?.end || '').slice(0, 5) || '07:00'
-              }))
-            )
+
+            setWhIntervals(firstIntervals.map(iv => ({
+              start: String(iv.start).slice(0, 5),
+              end: String(iv.end).slice(0, 5)
+            })))
           } else {
             setWhDays(DEFAULT_DAYS)
             setWhIntervals(DEFAULT_INTERVALS)
@@ -765,17 +767,16 @@ export default function PTProfile() {
               <div className="mb-3">
                 <div className="mb-2 text-xs text-gray-400">Chọn ngày làm trong tuần</div>
                 <div className="flex flex-wrap gap-2">
-                  {[0,1,2,3,4,5,6].map(d => (
+                  {[0, 1, 2, 3, 4, 5, 6].map(d => (
                     <button
                       key={d}
                       type="button"
                       disabled={profileLocked}
                       onClick={() => toggleDay(d)}
-                      className={`rounded-lg border px-3 py-1 text-sm ${
-                        whDays.includes(d)
+                      className={`rounded-lg border px-3 py-1 text-sm ${whDays.includes(d)
                           ? 'border-indigo-400 bg-indigo-500/20 text-indigo-100'
                           : 'border-white/10 bg-white/5 text-gray-300'
-                      }`}
+                        }`}
                     >
                       {dayLabel[d]}
                     </button>

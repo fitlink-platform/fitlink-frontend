@@ -44,3 +44,15 @@ main::-webkit-scrollbar-thumb {
   background-color: rgba(107, 114, 128, 0.6);
   border-radius: 9999px;
 }
+
+/* make native select dropdown dark so options are visible in dark theme */
+select,
+select option {
+  background-color: #0b1223 !important; /* page background */
+  color: #e5e7eb !important; /* light text */
+}
+
+/* optional: hide default IE/Edge arrow if you want a custom arrow */
+select::-ms-expand {
+  display: none;
+}

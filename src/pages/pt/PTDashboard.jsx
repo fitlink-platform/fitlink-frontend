@@ -136,7 +136,7 @@ export default function PTDashboard() {
     try {
       const data = await getMyWallet()
       
-      setBalance(data.data.balance || 0)
+      setBalance(data.data.available || 0)
     } catch (error) {
       console.error('Failed to fetch wallet:', error)
     }
