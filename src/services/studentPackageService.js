@@ -1,6 +1,6 @@
 // services/studentPackageService.js (Cập nhật sử dụng axiosClient)
 
-import axiosClient from '../api/axiosClient'; // Import client đã được cấu hình
+import axiosClient from '../api/axiosClient' // Import client đã được cấu hình
 
 // KHÔNG CẦN định nghĩa API_BASE_URL nữa
 
@@ -11,14 +11,16 @@ import axiosClient from '../api/axiosClient'; // Import client đã được c�
  * @returns {Promise<Array>} Danh sách các StudentPackage.
  */
 export async function getStudentPackages(studentId) {
-    try {
-        // Đường dẫn tương đối: /student-packages/student/:studentId
-        const response = await axiosClient.get(`/student-packages/student/${studentId}`);
-        return response.data;
-    } catch (error) {
-        // Interceptor đã hiển thị toast
-        throw error;
-    }
+  try {
+    // Đường dẫn tương đối: /student-packages/student/:studentId
+    const response = await axiosClient.get(
+      `/student-packages/student/${studentId}`
+    )
+    return response.data
+  } catch (error) {
+    // Interceptor đã hiển thị toast
+    throw error
+  }
 }
 
 /**
@@ -28,12 +30,12 @@ export async function getStudentPackages(studentId) {
  * @returns {Promise<object>} Chi tiết StudentPackage.
  */
 export async function getPackageDetails(packageId) {
-    try {
-        // Đường dẫn tương đối: /student-packages/:id
-        const response = await axiosClient.get(`/student-packages/${packageId}`);
-        return response.data;
-    } catch (error) {
-        // Interceptor đã hiển thị toast
-        throw error;
-    }
+  try {
+    // Đường dẫn tương đối: /student-packages/:id
+    const response = await axiosClient.get(`/student-packages/${packageId}`)
+    return response.data
+  } catch (error) {
+    // Interceptor đã hiển thị toast
+    throw error
+  }
 }

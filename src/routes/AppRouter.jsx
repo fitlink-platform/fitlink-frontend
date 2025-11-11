@@ -1,17 +1,17 @@
-import { Routes, Route, Navigate } from "react-router-dom";
-import LoginPage from "../pages/LoginPage";
-import HomePage from "~/pages/student/HomePage";
-import PrivateRoute from "./PrivateRoute";
-import AboutPage from "~/pages/student/AboutPage";
-import RegisterPage from "~/pages/RegisterPage";
-import NewsPage from "~/pages/student/NewsPage";
-import ContactPage from "~/pages/student/ContactPage";
-import UserProfile from "~/pages/student/UserProfile";
-import UnauthorizedPage from "~/pages/UnauthorizedPage";
-import VerifyEmail from "~/pages/VerifyEmail";
-import PTList from "~/pages/student/PTList";
-import ManagerUser from "../pages/admin/managerUser/ManagerUser";
-import UserDetail from "../pages/admin/ManagerUser/UserDetail";
+import { Routes, Route, Navigate } from 'react-router-dom'
+import LoginPage from '../pages/LoginPage'
+import HomePage from '~/pages/student/HomePage'
+import PrivateRoute from './PrivateRoute'
+import AboutPage from '~/pages/student/AboutPage'
+import RegisterPage from '~/pages/RegisterPage'
+import NewsPage from '~/pages/student/NewsPage'
+import ContactPage from '~/pages/student/ContactPage'
+import UserProfile from '~/pages/student/UserProfile'
+import UnauthorizedPage from '~/pages/UnauthorizedPage'
+import VerifyEmail from '~/pages/VerifyEmail'
+import PTList from '~/pages/student/PTList'
+import ManagerUser from '../pages/admin/managerUser/ManagerUser'
+import UserDetail from '../pages/admin/ManagerUser/UserDetail'
 
 import ResetPasswordPage from '~/pages/ResetPasswordPage'
 import ForgotPasswordPage from '~/pages/ForgotPasswordPage'
@@ -24,24 +24,25 @@ import PTMessagePage from '~/pages/pt/PTMessagePage'
 import PaymentResult from '~/pages/payment/PaymentResult'
 import MyCalendar from '~/pages/calendar/MyCalendar'
 import PTStudents from '~/pages/pt/PTStudent'
+import PTListAdmin from '~/pages/admin/managerUser/PTList'
+import StudentListAdmin from '~/pages/admin/managerUser/StudentList'
+import AdminLayout from '~/layouts/AdminLayout'
+import SearchPTs from '~/pages/student/SearchPTs'
+import PTCalendarPage from '~/pages/pt/PTCalendarPage'
+import PTRequestList from '~/pages/admin/PTRequestList'
+import PTRequestDetail from '~/pages/admin/PTRequestDetail'
+import PTCreatePackage from '~/pages/pt/PTCreatePackage'
+import PTSchedule from '~/pages/pt/PTSchedule'
+import TrainingCalendar from '~/components/TrainingCalendar'
 import MessagePage from '~/pages/MessagePage'
 import ChatAIPage from '~/pages/AIChatPage'
-import PTListAdmin from '~/pages/admin/managerUser/PTList';
-import StudentListAdmin from '~/pages/admin/managerUser/StudentList';
-import AdminLayout from "~/layouts/AdminLayout";
-import SearchPTs from '~/pages/student/SearchPTs';
-import PTCalendarPage from "~/pages/pt/PTCalendarPage";
-import PTMaterialsPage from "~/pages/pt/PTMaterialsPage";
-import PTRequestList from "~/pages/admin/PTRequestList";
-import PTRequestDetail from "~/pages/admin/PTRequestDetail";
-import PTCreatePackage from "~/pages/pt/PTCreatePackage";
-import PTSchedule from "~/pages/pt/PTSchedule";
-import BookingWizard from "~/pages/booking/BookingWizard";
-import NotificationsPage from "~/pages/student/NotificationsPage";
-import PTPackageDetail from "~/pages/pt/PTPackageDetail";
-import PTPackageEdit from "~/pages/pt/PTPackageEdit";
-import PTWallet from "~/pages/pt/PTWalletPage";
-import AdminPayouts from "~/pages/admin/AdminPayouts";
+import BookingWizard from '~/pages/booking/BookingWizard'
+import NotificationsPage from '~/pages/student/NotificationsPage'
+import PTPackageDetail from '~/pages/pt/PTPackageDetail'
+import PTPackageEdit from '~/pages/pt/PTPackageEdit'
+import PTWallet from '~/pages/pt/PTWalletPage'
+import AdminPayouts from '~/pages/admin/AdminPayouts'
+import PTMaterialsPage from '~/pages/pt/PTMaterialsPage'
 
 export default function AppRouter() {
   return (
@@ -53,10 +54,11 @@ export default function AppRouter() {
       <Route path="/unauthorized" element={<UnauthorizedPage />} />
       <Route path="/verify-email" element={<VerifyEmail />} />
       <Route path="/list-pt" element={<SearchPTs />} />
+      <Route path="/training-calendar" element={<TrainingCalendar />} />
       <Route
         path="/profile"
         element={
-          <PrivateRoute allowedRoles={["student", "pt"]}>
+          <PrivateRoute allowedRoles={['student', 'pt']}>
             <UserProfile />
           </PrivateRoute>
         }
@@ -70,7 +72,7 @@ export default function AppRouter() {
       <Route
         path="/chat"
         element={
-          <PrivateRoute allowedRoles={["student"]}>
+          <PrivateRoute allowedRoles={['student']}>
             <MessagePage />
           </PrivateRoute>
         }
@@ -79,7 +81,7 @@ export default function AppRouter() {
       <Route
         path="/chat/:ptId"
         element={
-          <PrivateRoute allowedRoles={["student"]}>
+          <PrivateRoute allowedRoles={['student']}>
             <MessagePage />
           </PrivateRoute>
         }
@@ -96,7 +98,7 @@ export default function AppRouter() {
       <Route
         path="/admin"
         element={
-          <PrivateRoute allowedRoles={["admin"]}>
+          <PrivateRoute allowedRoles={['admin']}>
             <DashboardPage />
           </PrivateRoute>
         }
@@ -130,7 +132,7 @@ export default function AppRouter() {
       <Route
         path="/pt/dashboard"
         element={
-          <PrivateRoute allowedRoles={["pt"]}>
+          <PrivateRoute allowedRoles={['pt']}>
             <PTDashboard />
           </PrivateRoute>
         }
@@ -146,15 +148,23 @@ export default function AppRouter() {
       <Route
         path="/pt/packages"
         element={
-          <PrivateRoute allowedRoles={["pt"]}>
+          <PrivateRoute allowedRoles={['pt']}>
             <PTPackages />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/pt/packages/new"
+        element={
+          <PrivateRoute allowedRoles={['pt']}>
+            <PTCreatePackage />
           </PrivateRoute>
         }
       />
       <Route
         path="/pt/packages/:packageId"
         element={
-          <PrivateRoute allowedRoles={["pt"]}>
+          <PrivateRoute allowedRoles={['pt']}>
             <PTPackageDetail />
           </PrivateRoute>
         }
@@ -162,26 +172,36 @@ export default function AppRouter() {
       <Route
         path="/pt/packages/:packageId/edit"
         element={
-          <PrivateRoute allowedRoles={["pt"]}>
+          <PrivateRoute allowedRoles={['pt']}>
             <PTPackageEdit />
           </PrivateRoute>
         }
       />
 
-      <Route path="/pt/packages/new" element={<PrivateRoute allowedRoles={["pt"]}><PTCreatePackage /></PrivateRoute>} />
+      <Route
+        path="/pt/packages/new"
+        element={
+          <PrivateRoute allowedRoles={['pt']}>
+            <PTCreatePackage />
+          </PrivateRoute>
+        }
+      />
       <Route
         path="/pt/profile"
         element={
-          <PrivateRoute allowedRoles={["pt"]}>
+          <PrivateRoute allowedRoles={['pt']}>
             <PTProfile />
           </PrivateRoute>
         }
       />
-      <Route path="/pt/materials" element={
-        <PrivateRoute allowedRoles={["pt"]}>
-          <PTMaterialsPage />
-        </PrivateRoute>
-      } />
+      <Route
+        path="/pt/materials"
+        element={
+          <PrivateRoute allowedRoles={['pt']}>
+            <PTMaterialsPage />
+          </PrivateRoute>
+        }
+      />
       <Route path="/payment/result" element={<PaymentResult />} />
 
       {/* ... */}
@@ -189,20 +209,18 @@ export default function AppRouter() {
       <Route path="/pt/schedule" element={<PTSchedule />} />
       {/* Student có thể dùng cùng page này nếu muốn, hoặc tách ra layout khác */}
       <Route path="/pt/students" element={<PTStudents />} />
-       <Route path="/pt/wallet" element={<PTWallet />} />
+      <Route path="/pt/wallet" element={<PTWallet />} />
       <Route path="/notifications" element={<NotificationsPage />} />
       <Route
         path="/pt/chat"
         element={
-          <PrivateRoute allowedRoles={["pt"]}>
+          <PrivateRoute allowedRoles={['pt']}>
             <PTMessagePage />
           </PrivateRoute>
         }
       />
 
       <Route path="/chat" element={<MessagePage />} />
-
-
     </Routes>
-  );
+  )
 }
