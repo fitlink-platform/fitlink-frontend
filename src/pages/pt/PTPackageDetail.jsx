@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { FaFilePdf, FaVideo, FaImage, FaFileAlt } from "react-icons/fa";
 import Swal from "sweetalert2";
 import "sweetalert2/dist/sweetalert2.min.css";
 
@@ -167,7 +168,7 @@ export default function PTPackageDetail() {
       toast.success("Đã xóa gói vĩnh viễn.");
       navigate("/pt/packages");
     } catch (err) {
-    //   toast.error(err?.message || "Xóa gói thất bại.");
+      //   toast.error(err?.message || "Xóa gói thất bại.");
     } finally {
       setSaving(false);
     }
@@ -258,11 +259,10 @@ export default function PTPackageDetail() {
           <button
             onClick={onToggleActive}
             disabled={saving}
-            className={`rounded-xl px-3 py-2 text-xs font-medium transition ${
-              pkg.isActive
+            className={`rounded-xl px-3 py-2 text-xs font-medium transition ${pkg.isActive
                 ? "bg-green-500/20 text-green-200 hover:bg-green-500/25"
                 : "bg-white/5 text-gray-300 hover:bg-white/10"
-            } border border-white/10`}
+              } border border-white/10`}
             title={pkg.isActive ? "Ẩn gói" : "Kích hoạt gói"}
           >
             {saving ? "Saving…" : pkg.isActive ? "Set Hidden" : "Set Active"}
@@ -380,28 +380,58 @@ export default function PTPackageDetail() {
           </div>
         </Section>
 
-        <Section title="Travel pricing">
-          {pkg.travelPricing?.enabled ? (
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-              <div>
-                <div className="text-xs text-gray-400">Free radius</div>
-                <div className="mt-1 text-sm text-gray-200">{pkg.travelPricing.freeRadiusKm} km</div>
-              </div>
-              <div>
-                <div className="text-xs text-gray-400">Max travel</div>
-                <div className="mt-1 text-sm text-gray-200">{pkg.travelPricing.maxTravelKm} km</div>
-              </div>
-              <div>
-                <div className="text-xs text-gray-400">Fee per km</div>
-                <div className="mt-1 text-sm text-gray-200">
-                  {pkg.travelPricing.feePerKm?.toLocaleString()}₫/km
+        <Section title="Materials">
+          {Array.isArray(pkg.materials) && pkg.materials.length > 0 ? (
+            <div className="divide-y divide-white/5">
+              {pkg.materials.map((m, i) => (
+                <div
+                  key={m._id || i}
+                  className="flex items-center justify-between py-3 text-sm text-gray-200"
+                >
+                  <div className="flex flex-col">
+                    <div className="flex items-center gap-2">
+                      {m.type === "pdf" ? (
+                        <FaFilePdf className="text-red-400" />
+                      ) : m.type === "video" ? (
+                        <FaVideo className="text-blue-400" />
+                      ) : m.type === "image" ? (
+                        <FaImage className="text-emerald-400" />
+                      ) : (
+                        <FaFileAlt className="text-gray-400" />
+                      )}
+                      <span className="font-medium text-white">
+                        {m.title || m.name}
+                      </span>
+                    </div>
+                    <span className="text-xs text-gray-400">
+                      {m.type || "Document"} • Cập nhật:{" "}
+                      {new Date(m.updatedAt || m.createdAt).toLocaleDateString("vi-VN")}
+                    </span>
+                  </div>
+
+                  {m.url ? (
+                    <a
+                      href={m.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="rounded-lg border border-white/10 bg-white/5 px-3 py-1 text-xs text-gray-300 hover:bg-white/10"
+                    >
+                      Xem tài liệu
+                    </a>
+                  ) : (
+                    <span className="text-xs text-gray-500 italic">
+                      Không có link
+                    </span>
+                  )}
                 </div>
-              </div>
+              ))}
             </div>
           ) : (
-            <div className="text-sm text-gray-300">—</div>
+            <div className="text-sm text-gray-400">No materials shared yet.</div>
           )}
         </Section>
+
+
       </div>
 
       {/* Meta */}

@@ -4,8 +4,10 @@ import axiosClient from "./axiosClient";
 /**
  * Lấy danh sách PT của học viên hiện tại
  */
-export const getMyPTs = () => {
-  return axiosClient.get("/student/me/pts");
+export const getMyPTs = async () => {
+  const res = await axiosClient.get("/messages/my-pts");
+  // backend: { success: true, data: [...] }
+  return res.data; // => { success, data }
 };
 
 /**
