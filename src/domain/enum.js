@@ -1,14 +1,14 @@
 export const PackageTagLabels = {
-  weight_loss: 'Giảm cân',
-  muscle_gain: 'Tăng cơ',
-  rehab: 'Phục hồi chấn thương',
-  posture: 'Cải thiện tư thế',
-  strength: 'Sức mạnh',
-  endurance: 'Thể lực',
-  general_health: 'Sức khỏe tổng quát',
-  nutrition: 'Dinh dưỡng',
-  competition: 'Chuẩn bị thi đấu',
-  other: 'Khác'
+  weight_loss: 'Weight Loss',
+  muscle_gain: 'Muscle Gain',
+  rehab: 'Injury Rehabilitation',
+  posture: 'Posture Improvement',
+  strength: 'Strength',
+  endurance: 'Endurance',
+  general_health: 'General Health',
+  nutrition: 'Nutrition',
+  competition: 'Competition Preparation',
+  other: 'Other'
 };
 
 
