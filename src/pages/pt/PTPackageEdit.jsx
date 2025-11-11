@@ -5,9 +5,63 @@ import PTMainLayout from "~/layouts/pt/PTMainLayout";
 import { getPackageById, updatePackage } from "~/services/packageService";
 import { PackageTagLabels, PackageTags } from "~/domain/enum";
 
-// weekday helpers
-const WD = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-const DAY_IDX = [0, 1, 2, 3, 4, 5, 6];
+// Hiển thị thứ: 0=Sun … 6=Sat, và Mon-first để bấm đẹp hơn
+const DOW0 = { 0: "Sun", 1: "Mon", 2: "Tue", 3: "Wed", 4: "Thu", 5: "Fri", 6: "Sat" };
+const UI_DAY_ORDER = [1, 2, 3, 4, 5, 6, 0];
+
+function PatternEditor({ value, onChange, index, onRemove, disabled }) {
+  const toggleDay = (d) => {
+    if (disabled) return;
+    const set = new Set(value);
+    set.has(d) ? set.delete(d) : set.add(d);
+    // sort theo Mon-first
+    const next = Array.from(set).sort((a, b) => UI_DAY_ORDER.indexOf(a) - UI_DAY_ORDER.indexOf(b));
+    onChange(next);
+  };
+
+  return (
+    <div className="rounded-xl border border-white/10 bg-white/5 p-3">
+      <div className="mb-2 flex items-center justify-between">
+        <div className="text-sm font-medium text-white">Pattern #{index + 1}</div>
+        <button
+          type="button"
+          onClick={onRemove}
+          disabled={disabled}
+          className="rounded-md border border-red-400/30 px-2 py-1 text-xs text-red-300 hover:bg-red-500/10 disabled:opacity-50"
+        >
+          Remove
+        </button>
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        {UI_DAY_ORDER.map((d) => (
+          <button
+            key={d}
+            type="button"
+            onClick={() => toggleDay(d)}
+            disabled={disabled}
+            className={`rounded-full px-3 py-1 text-xs ${
+              value.includes(d)
+                ? "bg-orange-500 text-white"
+                : "border border-white/10 text-gray-300 hover:bg-white/10"
+            }`}
+            title={`dayOfWeek=${d}`}
+          >
+            {DOW0[d]}
+          </button>
+        ))}
+      </div>
+
+      <div className="mt-3 text-xs text-gray-400">
+        Selected:{" "}
+        <span className="text-gray-200">
+          {value.length ? `${value.join(", ")} (${value.map((d) => DOW0[d]).join(", ")})` : "—"}
+        </span>{" "}
+        <span className="text-gray-500">(0=Sun, 1=Mon … 6=Sat)</span>
+      </div>
+    </div>
+  );
+}
 
 export default function PTPackageEdit() {
   const { packageId } = useParams();
@@ -29,7 +83,8 @@ export default function PTPackageEdit() {
     supports: { atPtGym: false, atClient: false, atOtherGym: false },
     travelOn: false,
     travelPricing: { enabled: false, freeRadiusKm: 0, maxTravelKm: 0, feePerKm: 0 },
-    daysGroup: [] // single group [1,3,5] (controller sẽ normalize)
+    // NEW: nhiều pattern; mỗi pattern là mảng số 0..6
+    daysOfWeek: [[1, 3, 5]],
   });
 
   useEffect(() => {
@@ -41,11 +96,12 @@ export default function PTPackageEdit() {
         const p = res?.data;
 
         const supports = p?.supports ?? { atPtGym: false, atClient: false, atOtherGym: false };
-        const travel = p?.travelPricing ?? { enabled: false, freeRadiusKm: 0, maxTravelKm: 0, feePerKm: 0 };
-        const daysGroup =
-          Array.isArray(p?.recurrence?.daysOfWeek) && p.recurrence.daysOfWeek[0]
-            ? p.recurrence.daysOfWeek[0]
-            : [];
+        const travel =
+          p?.travelPricing ?? { enabled: false, freeRadiusKm: 0, maxTravelKm: 0, feePerKm: 0 };
+
+        const daysOfWeek = Array.isArray(p?.recurrence?.daysOfWeek) && p.recurrence.daysOfWeek.length
+          ? p.recurrence.daysOfWeek
+          : [[1, 3, 5]];
 
         setForm({
           name: p?.name ?? "",
@@ -63,9 +119,9 @@ export default function PTPackageEdit() {
             enabled: !!travel.enabled,
             freeRadiusKm: Number(travel.freeRadiusKm ?? 0),
             maxTravelKm: Number(travel.maxTravelKm ?? 0),
-            feePerKm: Number(travel.feePerKm ?? 0)
+            feePerKm: Number(travel.feePerKm ?? 0),
           },
-          daysGroup
+          daysOfWeek,
         });
       } catch (e) {
         const msg = e?.message || "Không tải được dữ liệu.";
@@ -80,10 +136,45 @@ export default function PTPackageEdit() {
   const disabled = loading || saving;
   const onChange = (k, v) => setForm((s) => ({ ...s, [k]: v }));
 
+  // Pattern handlers
+  const addPattern = () => {
+    setForm((prev) => ({
+      ...prev,
+      daysOfWeek: [...(prev.daysOfWeek || []), [1, 3, 5]],
+    }));
+  };
+
+  const updatePattern = (idx, arr) => {
+    setForm((prev) => {
+      const next = [...(prev.daysOfWeek || [])];
+      // Làm sạch: số nguyên 0..6, unique
+      const cleaned = Array.from(new Set((arr || []).map(Number).filter((d) => d >= 0 && d <= 6)));
+      next[idx] = cleaned.sort((a, b) => a - b);
+      return { ...prev, daysOfWeek: next };
+    });
+  };
+
+  const removePattern = (idx) => {
+    setForm((prev) => {
+      const next = [...(prev.daysOfWeek || [])];
+      next.splice(idx, 1);
+      return { ...prev, daysOfWeek: next.length ? next : [[1, 3, 5]] };
+    });
+  };
+
   const onSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
     setErrorMsg("");
+
+    // Chuẩn hoá pattern gửi lên
+    const cleanedPatterns = (form.daysOfWeek || [])
+      .map((pat) =>
+        Array.from(new Set((pat || []).map(Number).filter((d) => d >= 0 && d <= 6))).sort(
+          (a, b) => a - b
+        )
+      )
+      .filter((pat) => pat.length > 0);
 
     const payload = {
       name: form.name.trim(),
@@ -100,12 +191,11 @@ export default function PTPackageEdit() {
         enabled: !!form.travelOn,
         freeRadiusKm: Number(form.travelPricing.freeRadiusKm || 0),
         maxTravelKm: Number(form.travelPricing.maxTravelKm || 0),
-        feePerKm: Number(form.travelPricing.feePerKm || 0)
+        feePerKm: Number(form.travelPricing.feePerKm || 0),
       },
       recurrence: {
-        // controller normalize được [1,3,5] hoặc [[...]]
-        daysOfWeek: Array.isArray(form.daysGroup) && form.daysGroup.length ? form.daysGroup : []
-      }
+        daysOfWeek: cleanedPatterns.length ? cleanedPatterns : [[1, 3, 5]],
+      },
     };
 
     try {
@@ -124,7 +214,9 @@ export default function PTPackageEdit() {
   if (loading) {
     return (
       <PTMainLayout>
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-sm text-gray-300">Loading…</div>
+        <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-sm text-gray-300">
+          Loading…
+        </div>
       </PTMainLayout>
     );
   }
@@ -171,7 +263,7 @@ export default function PTPackageEdit() {
       ) : null}
 
       <form id="pkg-edit" onSubmit={onSubmit} className="grid gap-5 lg:grid-cols-3">
-        {/* left: basics */}
+        {/* LEFT: Basics */}
         <div className="rounded-2xl border border-white/10 bg-white/5 p-4 lg:col-span-2">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <label className="block">
@@ -299,7 +391,7 @@ export default function PTPackageEdit() {
                         onChange={(e) =>
                           setForm((s) => ({
                             ...s,
-                            tags: e.target.checked ? [...s.tags, key] : s.tags.filter((t) => t !== key)
+                            tags: e.target.checked ? [...s.tags, key] : s.tags.filter((t) => t !== key),
                           }))
                         }
                         disabled={disabled}
@@ -314,8 +406,9 @@ export default function PTPackageEdit() {
           </div>
         </div>
 
-        {/* right: advanced */}
+        {/* RIGHT: Advanced */}
         <div className="space-y-5">
+          {/* Supports */}
           <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
             <div className="mb-3 text-sm font-semibold text-white">Supports</div>
             {["atPtGym", "atClient", "atOtherGym"].map((k) => (
@@ -334,6 +427,7 @@ export default function PTPackageEdit() {
             ))}
           </div>
 
+          {/* Travel pricing */}
           <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
             <div className="mb-3 flex items-center justify-between">
               <div className="text-sm font-semibold text-white">Travel pricing</div>
@@ -392,31 +486,36 @@ export default function PTPackageEdit() {
             </div>
           </div>
 
+          {/* Recurrence patterns */}
           <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-            <div className="mb-2 text-sm font-semibold text-white">Recurrence (days of week)</div>
-            <div className="grid grid-cols-4 gap-2">
-              {DAY_IDX.map((d) => (
-                <label key={d} className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    className="h-4 w-4 rounded border-white/20 bg-white/5"
-                    checked={form.daysGroup.includes(d)}
-                    onChange={(e) =>
-                      onChange(
-                        "daysGroup",
-                        e.target.checked
-                          ? Array.from(new Set([...form.daysGroup, d])).sort((a, b) => a - b)
-                          : form.daysGroup.filter((x) => x !== d)
-                      )
-                    }
-                    disabled={disabled}
-                  />
-                  <span className="text-sm text-gray-300">{WD[d]}</span>
-                </label>
+            <div className="mb-2 flex items-center justify-between">
+              <div className="text-sm font-semibold text-white">Recurrence patterns</div>
+              <button
+                type="button"
+                onClick={addPattern}
+                disabled={disabled}
+                className="rounded-lg border border-white/10 px-3 py-1.5 text-xs text-gray-300 hover:bg-white/10 disabled:opacity-50"
+              >
+                + Add pattern
+              </button>
+            </div>
+
+            <div className="grid gap-3">
+              {(form.daysOfWeek || []).map((pat, idx) => (
+                <PatternEditor
+                  key={idx}
+                  index={idx}
+                  value={pat}
+                  onChange={(arr) => updatePattern(idx, arr)}
+                  onRemove={() => removePattern(idx)}
+                  disabled={disabled}
+                />
               ))}
             </div>
+
             <div className="mt-2 text-xs text-gray-500">
-              Lưu ý: bạn đang chọn <b>1 nhóm</b> ngày lặp (ví dụ Mon,Wed,Fri). BE sẽ tự normalize.
+              * Mỗi pattern là một combo (ví dụ <b>[1,3,5]</b> hoặc <b>[2,4,6]</b>). Tất cả pattern dùng
+              chung <b>totalSessions</b>. (Quy ước: <b>0=Sun, 1=Mon … 6=Sat</b>)
             </div>
           </div>
         </div>

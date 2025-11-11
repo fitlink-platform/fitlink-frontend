@@ -8,6 +8,7 @@ import {
   FaClipboardList,
   FaCalendarAlt,
   FaSignOutAlt,
+  FaMoneyCheckAlt,
 } from "react-icons/fa";
 import { useState } from "react";
 
@@ -27,6 +28,16 @@ const menuItems = [
   { label: "Product Management", icon: <FaBoxOpen />, to: "/admin/products" },
   { label: "Order Management", icon: <FaClipboardList />, to: "/admin/orders" },
   { label: "Send Notification", icon: <FaConciergeBell />, to: "/admin/send-notification" },
+  {
+    label: "Payout Requests",
+    icon: <FaMoneyCheckAlt />,
+    subMenu: [
+      { label: "All", to: "/admin/payouts" },
+      { label: "Pending", to: "/admin/payouts?status=pending" },
+      { label: "Completed", to: "/admin/payouts?status=completed" },
+      { label: "Rejected", to: "/admin/payouts?status=rejected" },
+    ],
+  },
   {
     label: "Appointment Management",
     icon: <FaCalendarAlt />,
@@ -79,10 +90,9 @@ export default function SidebarAdmin() {
                       key={sub.to}
                       to={sub.to}
                       className={({ isActive }) =>
-                        `block px-4 py-1 rounded transition-all duration-200 text-sm ${
-                          isActive
-                            ? "bg-orange-500 text-white font-semibold"
-                            : "text-gray-400 hover:text-white hover:bg-slate-800"
+                        `block px-4 py-1 rounded transition-all duration-200 text-sm ${isActive
+                          ? "bg-orange-500 text-white font-semibold"
+                          : "text-gray-400 hover:text-white hover:bg-slate-800"
                         }`
                       }
                     >
@@ -98,10 +108,9 @@ export default function SidebarAdmin() {
               to={item.to}
               end={item.to === "/admin"}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
-                  isActive
-                    ? "bg-orange-500 text-white"
-                    : "text-gray-300 hover:text-white hover:bg-slate-800"
+                `flex items-center gap-3 px-4 py-2 rounded-lg font-medium transition-all duration-200 ${isActive
+                  ? "bg-orange-500 text-white"
+                  : "text-gray-300 hover:text-white hover:bg-slate-800"
                 }`
               }
             >

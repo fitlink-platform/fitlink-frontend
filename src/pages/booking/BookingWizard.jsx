@@ -78,7 +78,7 @@ export default function BookingWizard() {
         packageId: packageId || null,
         travelPolicy: {
           freeRadiusKm: 6,
-          maxTravelKm: 20,
+          maxTravelKm: 10,
           feePerKm: 10000,
         },
       });
@@ -120,7 +120,7 @@ export default function BookingWizard() {
         {/* Main card */}
         <div className="rounded-2xl border border-neutral-800 bg-neutral-900/90 backdrop-blur-md p-5 md:p-6 shadow-[0_20px_60px_rgba(0,0,0,0.6)] ring-1 ring-black/20">
           {step === 0 && <Step1SelectPackage packages={packages} onNext={() => setStep(1)} />}
-          {step === 1 && <Step2Location pt={pt} onBack={() => setStep(0)} onNext={() => setStep(2)} />}
+          {step === 1 && <Step2Location student={user} pt={pt} onBack={() => setStep(0)} onNext={() => setStep(2)} />}
           {step === 2 && <Step3Schedule pt={pt} onBack={() => setStep(1)} onNext={() => setStep(3)} />}
           {step === 3 && <Step4StartDate onBack={() => setStep(2)} onNext={() => setStep(4)} />}
           {step === 4 && (

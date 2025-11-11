@@ -40,6 +40,8 @@ import BookingWizard from "~/pages/booking/BookingWizard";
 import NotificationsPage from "~/pages/student/NotificationsPage";
 import PTPackageDetail from "~/pages/pt/PTPackageDetail";
 import PTPackageEdit from "~/pages/pt/PTPackageEdit";
+import PTWallet from "~/pages/pt/PTWalletPage";
+import AdminPayouts from "~/pages/admin/AdminPayouts";
 
 export default function AppRouter() {
   return (
@@ -121,6 +123,7 @@ export default function AppRouter() {
         }
       />
       <Route path="/admin/users/:id" element={<UserDetail />} />
+      <Route path="/admin/payouts" element={<AdminPayouts />} />
       <Route path="/pt" element={<Navigate to="/pt/dashboard" replace />} />
       <Route path="/admin/pt-requests" element={<PTRequestList />} />
       <Route path="/admin/pt-requests/:id" element={<PTRequestDetail />} />
@@ -186,6 +189,7 @@ export default function AppRouter() {
       <Route path="/pt/schedule" element={<PTSchedule />} />
       {/* Student có thể dùng cùng page này nếu muốn, hoặc tách ra layout khác */}
       <Route path="/pt/students" element={<PTStudents />} />
+       <Route path="/pt/wallet" element={<PTWallet />} />
       <Route path="/notifications" element={<NotificationsPage />} />
       <Route
         path="/pt/chat"
