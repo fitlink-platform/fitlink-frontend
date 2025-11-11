@@ -7,7 +7,8 @@ import {
   FaBoxOpen,
   FaClipboardList,
   FaCalendarAlt,
-  FaSignOutAlt
+  FaSignOutAlt,
+  FaMoneyCheckAlt
 } from 'react-icons/fa'
 import { useState } from 'react'
 
@@ -24,29 +25,18 @@ const menuItems = [
   },
   { label: 'Verify PT', icon: <FaTachometerAlt />, to: '/admin/pt-requests' },
   {
-    label: 'Service Management',
-    icon: <FaConciergeBell />,
-    to: '/admin/services'
-  },
-  { label: 'Product Management', icon: <FaBoxOpen />, to: '/admin/products' },
-  { label: 'Order Management', icon: <FaClipboardList />, to: '/admin/orders' },
-  {
     label: 'Send Notification',
     icon: <FaConciergeBell />,
     to: '/admin/send-notification'
   },
   {
-    label: 'Appointment Management',
-    icon: <FaCalendarAlt />,
+    label: 'Payout Requests',
+    icon: <FaMoneyCheckAlt />,
     subMenu: [
-      { label: 'Pending', to: '/admin/appointments/pending' },
-      { label: 'Confirmed', to: '/admin/appointments/confirmed' },
-      { label: 'In Progress', to: '/admin/appointments/in_progress' },
-      { label: 'Waiting Payment', to: '/admin/appointments/waiting_payment' },
-      { label: 'Completed', to: '/admin/appointments/completed' },
-      { label: 'Cancel Request', to: '/admin/appointments/request-cancel' },
-      { label: 'Cancelled', to: '/admin/appointments/cancelled' },
-      { label: 'Finished', to: '/admin/appointments/completed' }
+      { label: 'All', to: '/admin/payouts' },
+      { label: 'Pending', to: '/admin/payouts?status=pending' },
+      { label: 'Completed', to: '/admin/payouts?status=completed' },
+      { label: 'Rejected', to: '/admin/payouts?status=rejected' }
     ]
   },
   { label: 'Logout', icon: <FaSignOutAlt />, to: '/logout' }

@@ -13,10 +13,19 @@ export default function Navbar() {
   const dropdownRef = useRef()
   const navigate = useNavigate()
 
+  const [isProfileOpen, setIsProfileOpen] = useState(false)
+  const [isNotifOpen, setIsNotifOpen] = useState(false)
+
+  const profileRef = useRef()
+
+  // Đóng PROFILE khi click ra ngoài
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
         setShowDropdown(false)
+      }
+      if (profileRef.current && !profileRef.current.contains(e.target)) {
+        setIsProfileOpen(false)
       }
     }
     document.addEventListener('mousedown', handleClickOutside)
@@ -30,7 +39,6 @@ export default function Navbar() {
       navigate('/login')
     } catch (error) {
       console.error('Logout failed:', error)
-      throw error
     }
   }
 
@@ -52,7 +60,6 @@ export default function Navbar() {
         >
           Home
         </Link>
-        {/* Nếu router của bạn là /programs thì đổi lại cho đúng */}
         <Link
           to="/programs"
           className="relative hover:text-orange-500 transition-colors duration-200 after:content-[''] after:absolute after:w-0 after:h-[2px] after:left-0 after:-bottom-1 after:bg-orange-500 hover:after:w-full after:transition-all after:duration-300"
@@ -87,23 +94,39 @@ export default function Navbar() {
 
       {/* USER / LOGIN */}
       {user ? (
-        <div className="flex items-center gap-3 relative" ref={dropdownRef}>
-          {/* 👇 Chuông thông báo */}
-          <NotificationBell />
-
-          {/* Avatar / menu */}
-          <FaUser
-            className="cursor-pointer text-gray-800 hover:text-orange-500 transition"
-            onClick={() => setShowDropdown((prev) => !prev)}
+        <div className="relative flex items-center gap-3" ref={profileRef}>
+          {/* 🔔 Chuông thông báo – controlled từ Navbar */}
+          <NotificationBell
+            isOpen={isNotifOpen}
+            onOpen={() => {
+              setIsNotifOpen(true)
+              setIsProfileOpen(false) // 🔒 mở chuông thì đóng profile
+            }}
+            onClose={() => setIsNotifOpen(false)}
+            variant="light"
           />
-          {showDropdown && (
-            <div className="absolute right-0 mt-3 w-48 bg-white border rounded-lg shadow-xl text-gray-700 overflow-hidden">
-              <ul>
+
+          {/* 👤 Avatar / toggle menu Profile */}
+          <button
+            type="button"
+            onClick={() => {
+              setIsProfileOpen((prev) => !prev) // toggle profile
+              setIsNotifOpen(false) // 🔒 mở profile thì đóng chuông
+            }}
+            className="flex items-center justify-center"
+          >
+            <FaUser className="cursor-pointer text-gray-800 hover:text-orange-500 transition" />
+          </button>
+
+          {/* Dropdown Profile */}
+          {isProfileOpen && (
+            <div className="absolute right-0 top-full mt-2 w-56 bg-white border rounded-lg shadow-xl text-gray-700 z-[9999]">
+              <ul className="py-1">
                 <li
                   className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                   onClick={() => {
                     navigate('/profile')
-                    setShowDropdown(false)
+                    setIsProfileOpen(false)
                   }}
                 >
                   Profile
@@ -112,7 +135,7 @@ export default function Navbar() {
                   className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                   onClick={() => {
                     navigate('/customer/orders')
-                    setShowDropdown(false)
+                    setIsProfileOpen(false)
                   }}
                 >
                   My Packages
@@ -130,9 +153,8 @@ export default function Navbar() {
                 <li
                   className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                   onClick={() => {
-                    // PT đi /pt/chat, user đi /chat
                     navigate(user?.role === 'pt' ? '/pt/chat' : '/chat')
-                    setShowDropdown(false)
+                    setIsProfileOpen(false)
                   }}
                 >
                   My Messages
@@ -141,17 +163,12 @@ export default function Navbar() {
                   Support
                 </li>
                 <li
-                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                  onClick={() => {
-                    navigate('/chat-ai')
-                    setShowDropdown(false)
-                  }}
-                >
-                  AI Assistant
-                </li>
-                <li
-                  onClick={handleClickLogout}
                   className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-red-600 font-medium"
+                  onClick={() => {
+                    setIsProfileOpen(false)
+                    setIsNotifOpen(false)
+                    handleClickLogout()
+                  }}
                 >
                   Logout
                 </li>

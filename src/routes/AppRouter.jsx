@@ -38,9 +38,11 @@ import MessagePage from '~/pages/MessagePage'
 import ChatAIPage from '~/pages/AIChatPage'
 import BookingWizard from '~/pages/booking/BookingWizard'
 import NotificationsPage from '~/pages/student/NotificationsPage'
-
 import PTPackageDetail from '~/pages/pt/PTPackageDetail'
 import PTPackageEdit from '~/pages/pt/PTPackageEdit'
+import PTWallet from '~/pages/pt/PTWalletPage'
+import AdminPayouts from '~/pages/admin/AdminPayouts'
+import PTMaterialsPage from '~/pages/pt/PTMaterialsPage'
 
 export default function AppRouter() {
   return (
@@ -67,7 +69,23 @@ export default function AppRouter() {
       <Route path="/about" element={<AboutPage />} />
       <Route path="/news" element={<NewsPage />} />
       <Route path="/contact" element={<ContactPage />} />
-      <Route path="/chat/:ptId" element={<MessagePage />} />
+      <Route
+        path="/chat"
+        element={
+          <PrivateRoute allowedRoles={['student']}>
+            <MessagePage />
+          </PrivateRoute>
+        }
+      />
+
+      <Route
+        path="/chat/:ptId"
+        element={
+          <PrivateRoute allowedRoles={['student']}>
+            <MessagePage />
+          </PrivateRoute>
+        }
+      />
       <Route path="/chat-ai" element={<ChatAIPage />} />
 
       {/* Trainer - Nguyen */}
@@ -107,6 +125,7 @@ export default function AppRouter() {
         }
       />
       <Route path="/admin/users/:id" element={<UserDetail />} />
+      <Route path="/admin/payouts" element={<AdminPayouts />} />
       <Route path="/pt" element={<Navigate to="/pt/dashboard" replace />} />
       <Route path="/admin/pt-requests" element={<PTRequestList />} />
       <Route path="/admin/pt-requests/:id" element={<PTRequestDetail />} />
@@ -175,6 +194,14 @@ export default function AppRouter() {
           </PrivateRoute>
         }
       />
+      <Route
+        path="/pt/materials"
+        element={
+          <PrivateRoute allowedRoles={['pt']}>
+            <PTMaterialsPage />
+          </PrivateRoute>
+        }
+      />
       <Route path="/payment/result" element={<PaymentResult />} />
 
       {/* ... */}
@@ -182,8 +209,16 @@ export default function AppRouter() {
       <Route path="/pt/schedule" element={<PTSchedule />} />
       {/* Student có thể dùng cùng page này nếu muốn, hoặc tách ra layout khác */}
       <Route path="/pt/students" element={<PTStudents />} />
+      <Route path="/pt/wallet" element={<PTWallet />} />
       <Route path="/notifications" element={<NotificationsPage />} />
-      <Route path="/pt/chat" element={<PTMessagePage />} />
+      <Route
+        path="/pt/chat"
+        element={
+          <PrivateRoute allowedRoles={['pt']}>
+            <PTMessagePage />
+          </PrivateRoute>
+        }
+      />
 
       <Route path="/chat" element={<MessagePage />} />
     </Routes>

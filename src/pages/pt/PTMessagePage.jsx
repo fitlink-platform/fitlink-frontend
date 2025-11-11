@@ -1,4 +1,6 @@
+// src/pages/pt/PTMessagePage.jsx
 import React, { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { useAuth } from "~/contexts/AuthProvider";
 import ChatSidebar from "~/components/chat/ChatSidebar";
 import ChatWindow from "~/components/chat/ChatWindow";
@@ -10,19 +12,36 @@ const PTMessagePage = () => {
   const [students, setStudents] = useState([]);
   const [selected, setSelected] = useState(null);
 
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const peerIdFromUrl = searchParams.get("peer");
+
   useEffect(() => {
     if (!pt?._id) return;
 
     getMyStudents()
       .then((res) => setStudents(res.data.data || res.data || []))
-      .catch((err) => console.error("❌ Lỗi khi tải học viên:", err));
+      .catch((err) =>
+        console.error("❌ Lỗi khi tải học viên:", err)
+      );
   }, [pt?._id]);
+
+  // Khi đã có list students + peer từ URL -> auto chọn
+  useEffect(() => {
+    if (!peerIdFromUrl || !students.length) return;
+    const found = students.find(
+      (s) => String(s._id) === String(peerIdFromUrl)
+    );
+    if (found) setSelected(found);
+  }, [peerIdFromUrl, students]);
 
   return (
     <PTMainLayout>
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-semibold text-white">Messages</h1>
+          <h1 className="text-xl font-semibold text-white">
+            Messages
+          </h1>
         </div>
 
         <div className="rounded-2xl border border-white/10 bg-white/5 overflow-hidden h-[calc(100vh-180px)]">

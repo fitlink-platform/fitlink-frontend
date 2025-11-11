@@ -1,10 +1,10 @@
 import MainLayout from "~/layouts/MainLayout";
-import HeroCarousel from "~/components/HeroCarousel";
+import AboutHero from "~/components/about/AboutHero";
 
 export default function AboutPage() {
     return (
         <MainLayout>
-            <HeroCarousel />
+            <AboutHero />
         </MainLayout>
     );
 }

@@ -161,20 +161,28 @@ const PackageCard = ({ pkg, onSelect }) => (
     <div className="flex flex-col h-full">
       <div className="flex-1">
         <h3 className="text-indigo-300 text-lg font-semibold">{pkg?.name}</h3>
-        <p className="text-slate-300 mt-2 line-clamp-3 text-sm">{pkg?.description}</p>
+        <p className="text-slate-300 mt-2 line-clamp-3 text-sm">
+          {pkg?.description}
+        </p>
         <div className="mt-3 flex items-center gap-3">
-          <Chip className="bg-amber-900/30 text-amber-200 border-amber-800">💰 {formatVND(pkg?.price)} VND</Chip>
-          {pkg?.duration ? <Chip>⏱ {pkg.duration} days</Chip> : null}
+          <Chip className="bg-amber-900/30 text-amber-200 border-amber-800">
+            💰 {formatVND(pkg?.price)} VND
+          </Chip>
+          {pkg?.durationDays && (
+            <Chip>⏱ {pkg.durationDays} days</Chip>
+          )}
         </div>
       </div>
       <button
         onClick={() => onSelect?.(pkg)}
-        className="mt-4 w-full bg-gradient-to-r from-indigo-700 to-violet-700 hover:from-indigo-600 hover:to-violet-600 text-white py-2.5 rounded-lg font-semibold text-sm">
+        className="mt-4 w-full bg-gradient-to-r from-indigo-700 to-violet-700 hover:from-indigo-600 hover:to-violet-600 text-white py-2.5 rounded-lg font-semibold text-sm"
+      >
         View details
       </button>
     </div>
   </div>
-)
+);
+
 
 // =============== Main ===============
 const PTDetail = () => {
