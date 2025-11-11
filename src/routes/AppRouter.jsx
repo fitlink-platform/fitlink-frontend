@@ -31,6 +31,7 @@ import StudentListAdmin from '~/pages/admin/managerUser/StudentList';
 import AdminLayout from "~/layouts/AdminLayout";
 import SearchPTs from '~/pages/student/SearchPTs';
 import PTCalendarPage from "~/pages/pt/PTCalendarPage";
+import PTMaterialsPage from "~/pages/pt/PTMaterialsPage";
 import PTRequestList from "~/pages/admin/PTRequestList";
 import PTRequestDetail from "~/pages/admin/PTRequestDetail";
 import PTCreatePackage from "~/pages/pt/PTCreatePackage";
@@ -64,7 +65,23 @@ export default function AppRouter() {
       <Route path="/about" element={<AboutPage />} />
       <Route path="/news" element={<NewsPage />} />
       <Route path="/contact" element={<ContactPage />} />
-      <Route path="/chat/:ptId" element={<MessagePage />} />
+      <Route
+        path="/chat"
+        element={
+          <PrivateRoute allowedRoles={["student"]}>
+            <MessagePage />
+          </PrivateRoute>
+        }
+      />
+
+      <Route
+        path="/chat/:ptId"
+        element={
+          <PrivateRoute allowedRoles={["student"]}>
+            <MessagePage />
+          </PrivateRoute>
+        }
+      />
       <Route path="/chat-ai" element={<ChatAIPage />} />
 
       {/* Trainer - Nguyen */}
@@ -157,6 +174,11 @@ export default function AppRouter() {
           </PrivateRoute>
         }
       />
+      <Route path="/pt/materials" element={
+        <PrivateRoute allowedRoles={["pt"]}>
+          <PTMaterialsPage />
+        </PrivateRoute>
+      } />
       <Route path="/payment/result" element={<PaymentResult />} />
 
       {/* ... */}
@@ -165,7 +187,14 @@ export default function AppRouter() {
       {/* Student có thể dùng cùng page này nếu muốn, hoặc tách ra layout khác */}
       <Route path="/pt/students" element={<PTStudents />} />
       <Route path="/notifications" element={<NotificationsPage />} />
-      <Route path="/pt/chat" element={<PTMessagePage />} />
+      <Route
+        path="/pt/chat"
+        element={
+          <PrivateRoute allowedRoles={["pt"]}>
+            <PTMessagePage />
+          </PrivateRoute>
+        }
+      />
 
       <Route path="/chat" element={<MessagePage />} />
 

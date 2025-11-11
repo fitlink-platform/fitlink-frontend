@@ -1,24 +1,27 @@
 import React, { useEffect, useState } from "react";
-import { Bell } from "lucide-react"; // modern icon
+import { Bell, ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import {
   getNotifications,
   markFeedbackSent,
 } from "~/services/notificationService";
 import NotificationItem from "~/components/NotificationItem";
+import Navbar from "~/components/Navbar";
 
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
-  // 🔄 Fetch notifications
+  // Load all notifications
   const loadNotifications = async () => {
     try {
       setLoading(true);
       const res = await getNotifications();
-      console.log("📬 Notifications:", res);
-      setNotifications(res || []);
+      setNotifications(Array.isArray(res) ? res : []);
     } catch (err) {
       console.error("❌ Error loading notifications:", err);
+      setNotifications([]);
     } finally {
       setLoading(false);
     }
@@ -28,7 +31,6 @@ export default function NotificationsPage() {
     loadNotifications();
   }, []);
 
-  // 🟢 Handle feedback sent
   const handleFeedbackSent = async (id) => {
     try {
       await markFeedbackSent(id);
@@ -39,17 +41,26 @@ export default function NotificationsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f9fafb] dark:bg-[#0f172a] px-6 py-8 transition-all">
-      <div className="max-w-3xl mx-auto">
-        {/* Page header */}
+    <div className="min-h-screen bg-[#f9fafb] dark:bg-[#0f172a] text-gray-900 dark:text-gray-100">
+      {/* 🧡 Navbar */}
+      <div className="relative">
+        <Navbar />
+        {/* 🔙 Nút back nằm ngay góc trái trên thanh Navbar */}
+        <button
+          onClick={() => navigate(-1)}
+          className="absolute top-1/2 -translate-y-1/2 left-6 flex items-center gap-1 px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-md transition"
+        >
+          <ArrowLeft size={16} /> Back
+        </button>
+      </div>
+
+      {/* ======= MAIN CONTENT ======= */}
+      <main className="max-w-3xl mx-auto px-6 py-10">
         <div className="flex items-center gap-3 mb-8">
           <Bell className="w-7 h-7 text-orange-500" />
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-            Your Notifications
-          </h1>
+          <h1 className="text-3xl font-bold">Your Notifications</h1>
         </div>
 
-        {/* Notifications */}
         {loading ? (
           <div className="flex justify-center items-center py-20 text-gray-400">
             Loading notifications...
@@ -60,7 +71,7 @@ export default function NotificationsPage() {
             <p>No notifications yet.</p>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-4">
             {notifications.map((n) => (
               <NotificationItem
                 key={n._id}
@@ -70,7 +81,7 @@ export default function NotificationsPage() {
             ))}
           </div>
         )}
-      </div>
+      </main>
     </div>
   );
 }
