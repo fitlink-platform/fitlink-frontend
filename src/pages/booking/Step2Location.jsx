@@ -249,7 +249,7 @@ export default function Step2Location({ student, pt, onBack, onNext }) {
     } else if (mode === "atPtGym") {
       // Không tính phí, reset hiển thị phí (nếu có)
       setTravelFee(null);
-      set({ mode, clientAddress: payload, otherGymAddress: null });
+      set({ mode, clientAddress: payload, otherGymAddress: null, travelFee: 0 });
     }
   };
 
