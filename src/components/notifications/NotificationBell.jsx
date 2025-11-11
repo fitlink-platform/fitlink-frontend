@@ -176,6 +176,18 @@ export default function NotificationBell({ variant = "light" }) {
               </li>
             ))}
           </ul>
+           {/* 🔸 Nút View all notifications ở cuối */}
+          {items.length > 0 && (
+            <div className="sticky bottom-0 text-center py-2 border-t bg-gray-50">
+              <a
+                href="/notifications"
+                onClick={() => setOpen(false)}
+                className="inline-block text-sm font-semibold text-orange-500 hover:text-orange-600 hover:underline transition-colors"
+              >
+                View all notifications →
+              </a>
+            </div>
+          )}
         </div>
       )}
     </div>

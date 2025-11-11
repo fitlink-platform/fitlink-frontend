@@ -98,6 +98,7 @@ export default function Navbar() {
               setIsProfileOpen(false); // 🔒 mở chuông thì đóng profile
             }}
             onClose={() => setIsNotifOpen(false)}
+            variant="light"
           />
 
           {/* 👤 Avatar / toggle menu Profile */}
