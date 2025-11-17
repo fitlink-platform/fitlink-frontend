@@ -54,3 +54,14 @@ export const getCustomerCount = async () => {
   const res = await axios.get('/admin/users/count');
   return res.data.totalCustomers;
 };
+
+export const getMyAccount = async () => {
+  const res = await axios.get('/pt/account/me')
+  // trả về phần data cho tiện dùng trong FE
+  return res.data
+}
+
+export const getAllUsers = async () => {
+  const res = await axios.get('/pt/users');
+return res.data;  
+}

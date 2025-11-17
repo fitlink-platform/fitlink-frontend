@@ -19,7 +19,7 @@ const UserDetail = () => {
     setLoading(true);
     try {
       const res = await axios.get(`/admin/users`);
-      const found = res.data.find(u => u._id === id);
+      const found = res.data.find((u) => u._id === id);
       setUser(found || null);
     } catch (err) {
       setUser(null);
@@ -45,45 +45,109 @@ const UserDetail = () => {
     return d.toLocaleString();
   };
 
-  if (loading) return <div className="flex min-h-screen"><SidebarAdmin /><div className="flex-1 flex items-center justify-center">Đang tải...</div></div>;
-  if (!user) return <div className="flex min-h-screen"><SidebarAdmin /><div className="flex-1 flex items-center justify-center text-red-500">Không tìm thấy người dùng</div></div>;
+  if (loading)
+    return (
+      <div className="flex min-h-screen bg-[#121212] text-gray-200">
+        <SidebarAdmin />
+        <div className="flex-1 flex items-center justify-center text-orange-400">
+          Đang tải...
+        </div>
+      </div>
+    );
+
+  if (!user)
+    return (
+      <div className="flex min-h-screen bg-[#121212] text-gray-200">
+        <SidebarAdmin />
+        <div className="flex-1 flex items-center justify-center text-red-500">
+          Không tìm thấy người dùng
+        </div>
+      </div>
+    );
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen bg-[#121212] text-gray-200">
       <SidebarAdmin />
       <main className="flex-1 p-8 flex flex-col items-center">
-        <div className="w-full bg-white rounded-lg shadow p-8">
-          <button className="mb-4 text-blue-500 hover:underline" onClick={() => navigate(-1)}>&larr; Quay lại</button>
-          <h2 className="text-2xl font-bold mb-6 text-orange-600 text-center">Chi tiết người dùng</h2>
-          <div className="flex flex-col items-center mb-6">
+        <div className="w-full max-w-3xl bg-[#1e1e1e] rounded-xl shadow-lg p-8 border border-gray-800">
+          <button
+            className="mb-4 text-orange-400 hover:underline flex items-center gap-1"
+            onClick={() => navigate(-1)}
+          >
+            ← Quay lại
+          </button>
+
+          <h2 className="text-3xl font-bold mb-6 text-center text-orange-500">
+            Chi tiết người dùng
+          </h2>
+
+          <div className="flex flex-col items-center mb-8">
             {user.avatar ? (
-              <img src={user.avatar} alt="avatar" className="w-24 h-24 rounded-full object-cover mb-2 border" />
+              <img
+                src={user.avatar}
+                alt="avatar"
+                className="w-28 h-28 rounded-full object-cover mb-3 border-2 border-orange-500"
+              />
             ) : (
-              <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center mb-2 text-3xl">👤</div>
+              <div className="w-28 h-28 rounded-full bg-gray-700 flex items-center justify-center mb-3 text-4xl">
+                👤
+              </div>
             )}
             <div className="text-xl font-semibold">{user.name}</div>
-            <div className="text-gray-500">{user.phone}</div>
-            <div className="text-gray-500">{user.email}</div>
+            <div className="text-gray-400">{user.phone}</div>
+            <div className="text-gray-400">{user.email}</div>
           </div>
+
           <div className="space-y-2 mb-6">
             <div><b>Họ tên:</b> {user.name}</div>
             <div><b>SĐT:</b> {user.phone}</div>
             <div><b>Email:</b> {user.email}</div>
             <div><b>Giới tính:</b> {user.gender}</div>
-            <div><b>Địa chỉ:</b> {user.address || '-'}</div>
-            <div><b>Trạng thái:</b> <span className={`px-2 py-1 rounded text-xs font-semibold ${user.isActive ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>{user.isActive ? "Đang hoạt động" : "Đã bị khóa"}</span></div>
-            <div><b>Xác thực:</b> <span className={`px-2 py-1 rounded text-xs font-semibold ${user.verified ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>{user.verified ? "Đã xác thực" : "Chưa xác thực"}</span></div>
+            <div><b>Địa chỉ:</b> {user.address || "-"}</div>
+            <div>
+              <b>Trạng thái:</b>{" "}
+              <span
+                className={`px-2 py-1 rounded text-xs font-semibold ${
+                  user.isActive
+                    ? "bg-green-900/40 text-green-400"
+                    : "bg-red-900/40 text-red-400"
+                }`}
+              >
+                {user.isActive ? "Đang hoạt động" : "Đã bị khóa"}
+              </span>
+            </div>
+            <div>
+              <b>Xác thực:</b>{" "}
+              <span
+                className={`px-2 py-1 rounded text-xs font-semibold ${
+                  user.verified
+                    ? "bg-green-900/40 text-green-400"
+                    : "bg-red-900/40 text-red-400"
+                }`}
+              >
+                {user.verified ? "Đã xác thực" : "Chưa xác thực"}
+              </span>
+            </div>
             <div><b>Quyền:</b> {user.role}</div>
             <div><b>Ngày tạo:</b> {formatDate(user.createdAt)}</div>
             <div><b>Ngày cập nhật:</b> {formatDate(user.updatedAt)}</div>
           </div>
+
           {user.role !== "admin" && (
             <button
-              className={`w-full py-2 rounded text-white font-semibold ${user.isActive ? "bg-red-500 hover:bg-red-600" : "bg-green-500 hover:bg-green-600"}`}
+              className={`w-full py-2 rounded text-white font-semibold transition ${
+                user.isActive
+                  ? "bg-red-600 hover:bg-red-500"
+                  : "bg-orange-600 hover:bg-orange-500"
+              }`}
               onClick={handleBlockToggle}
               disabled={blockLoading}
             >
-              {blockLoading ? "Đang xử lý..." : user.isActive ? "Block" : "Unblock"}
+              {blockLoading
+                ? "Đang xử lý..."
+                : user.isActive
+                ? "Block tài khoản"
+                : "Mở khóa tài khoản"}
             </button>
           )}
         </div>
@@ -92,4 +156,4 @@ const UserDetail = () => {
   );
 };
 
-export default UserDetail; 
+export default UserDetail;

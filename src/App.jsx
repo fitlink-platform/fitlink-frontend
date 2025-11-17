@@ -5,7 +5,6 @@ import LoadingSpinner from './components/LoadingSpinner';
 import ScrollToTop from './components/ScrollToTop';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
 export default function App() {
   const { loading } = useContext(AuthContext);
 
@@ -25,7 +24,6 @@ export default function App() {
         draggable
         pauseOnHover
       />
-      
     </>
   );
 }

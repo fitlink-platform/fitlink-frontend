@@ -1,35 +1,44 @@
-import React, { useEffect, useState, useRef, useContext } from 'react';
-import { FaUser } from "react-icons/fa";
-import { Link, useNavigate } from "react-router-dom";
-import { AuthContext } from "~/contexts/AuthContext";
-import { logout } from '~/services/authService';
-import { toast } from 'react-toastify';
+// src/components/Navbar.jsx
+import React, { useEffect, useState, useRef, useContext } from 'react'
+import { FaUser } from 'react-icons/fa'
+import { Link, useNavigate } from 'react-router-dom'
+import { AuthContext } from '~/contexts/AuthContext'
+import { logout } from '~/services/authService'
+import { toast } from 'react-toastify'
+import NotificationBell from '~/components/notifications/NotificationBell' // 👈 THÊM
 
 export default function Navbar() {
-  const { user } = useContext(AuthContext);
-  const [showDropdown, setShowDropdown] = useState(false);
-  const dropdownRef = useRef();
+  const { user } = useContext(AuthContext)
+  const [showDropdown, setShowDropdown] = useState(false)
+  const dropdownRef = useRef()
   const navigate = useNavigate()
 
+  const [isProfileOpen, setIsProfileOpen] = useState(false)
+  const [isNotifOpen, setIsNotifOpen] = useState(false)
+
+  const profileRef = useRef()
+
+  // Đóng PROFILE khi click ra ngoài
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-        setShowDropdown(false);
+        setShowDropdown(false)
       }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+      if (profileRef.current && !profileRef.current.contains(e.target)) {
+        setIsProfileOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   const handleClickLogout = async () => {
     try {
       await logout()
-      toast.success("Logout Successful!")
+      toast.success('Logout Successful!')
       navigate('/login')
-
     } catch (error) {
-      console.error('Logout failed:', error); // xử lý lỗi cụ thể
-      throw error;
+      console.error('Logout failed:', error)
     }
   }
 
@@ -46,16 +55,22 @@ export default function Navbar() {
       {/* NAVIGATION */}
       <nav className="hidden md:flex items-center gap-8 text-[15px] font-medium text-gray-800">
         <Link
-          to="/"
+          to="/home"
           className="relative hover:text-orange-500 transition-colors duration-200 after:content-[''] after:absolute after:w-0 after:h-[2px] after:left-0 after:-bottom-1 after:bg-orange-500 hover:after:w-full after:transition-all after:duration-300"
         >
           Home
         </Link>
         <Link
-          to="/services"
+          to="/programs"
           className="relative hover:text-orange-500 transition-colors duration-200 after:content-[''] after:absolute after:w-0 after:h-[2px] after:left-0 after:-bottom-1 after:bg-orange-500 hover:after:w-full after:transition-all after:duration-300"
         >
           Programs
+        </Link>
+        <Link
+          to="/list-pt"
+          className="relative hover:text-orange-500 transition-colors duration-200 after:content-[''] after:absolute after:w-0 after:h-[2px] after:left-0 after:-bottom-1 after:bg-orange-500 hover:after:w-full after:transition-all after:duration-300"
+        >
+          Trainers
         </Link>
         <Link
           to="/pricing"
@@ -79,19 +94,39 @@ export default function Navbar() {
 
       {/* USER / LOGIN */}
       {user ? (
-        <div className="relative" ref={dropdownRef}>
-          <FaUser
-            className="cursor-pointer text-gray-800 hover:text-orange-500 transition"
-            onClick={() => setShowDropdown((prev) => !prev)}
+        <div className="relative flex items-center gap-3" ref={profileRef}>
+          {/* 🔔 Chuông thông báo – controlled từ Navbar */}
+          <NotificationBell
+            isOpen={isNotifOpen}
+            onOpen={() => {
+              setIsNotifOpen(true)
+              setIsProfileOpen(false) // 🔒 mở chuông thì đóng profile
+            }}
+            onClose={() => setIsNotifOpen(false)}
+            variant="light"
           />
-          {showDropdown && (
-            <div className="absolute right-0 mt-3 w-48 bg-white border rounded-lg shadow-xl text-gray-700 overflow-hidden">
-              <ul>
+
+          {/* 👤 Avatar / toggle menu Profile */}
+          <button
+            type="button"
+            onClick={() => {
+              setIsProfileOpen((prev) => !prev) // toggle profile
+              setIsNotifOpen(false) // 🔒 mở profile thì đóng chuông
+            }}
+            className="flex items-center justify-center"
+          >
+            <FaUser className="cursor-pointer text-gray-800 hover:text-orange-500 transition" />
+          </button>
+
+          {/* Dropdown Profile */}
+          {isProfileOpen && (
+            <div className="absolute right-0 top-full mt-2 w-56 bg-white border rounded-lg shadow-xl text-gray-700 z-[9999]">
+              <ul className="py-1">
                 <li
                   className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                   onClick={() => {
-                    navigate('/profile');
-                    setShowDropdown(false);
+                    navigate('/profile')
+                    setIsProfileOpen(false)
                   }}
                 >
                   Profile
@@ -99,16 +134,41 @@ export default function Navbar() {
                 <li
                   className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                   onClick={() => {
-                    navigate('/customer/orders');
-                    setShowDropdown(false);
+                    navigate('/customer/orders')
+                    setIsProfileOpen(false)
                   }}
                 >
                   My Packages
                 </li>
-                <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">Support</li>
+
                 <li
-                  onClick={handleClickLogout}
+                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2"
+                  onClick={() => {
+                    navigate('/training-calendar')
+                    setShowDropdown(false)
+                  }}
+                >
+                  My Training Schedule
+                </li>
+                <li
+                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                  onClick={() => {
+                    navigate(user?.role === 'pt' ? '/pt/chat' : '/chat')
+                    setIsProfileOpen(false)
+                  }}
+                >
+                  My Messages
+                </li>
+                <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                  Support
+                </li>
+                <li
                   className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-red-600 font-medium"
+                  onClick={() => {
+                    setIsProfileOpen(false)
+                    setIsNotifOpen(false)
+                    handleClickLogout()
+                  }}
                 >
                   Logout
                 </li>
@@ -125,6 +185,5 @@ export default function Navbar() {
         </button>
       )}
     </header>
-
-  );
+  )
 }
