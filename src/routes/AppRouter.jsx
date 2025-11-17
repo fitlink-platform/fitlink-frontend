@@ -11,7 +11,7 @@ import UnauthorizedPage from '~/pages/UnauthorizedPage'
 import VerifyEmail from '~/pages/VerifyEmail'
 import PTList from '~/pages/student/PTList'
 import ManagerUser from '../pages/admin/managerUser/ManagerUser'
-import UserDetail from '../pages/admin/ManagerUser/UserDetail'
+import UserDetail from '../pages/admin/managerUser/UserDetail'
 
 import ResetPasswordPage from '~/pages/ResetPasswordPage'
 import ForgotPasswordPage from '~/pages/ForgotPasswordPage'
