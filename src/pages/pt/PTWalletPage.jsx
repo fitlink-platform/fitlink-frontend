@@ -5,7 +5,7 @@ import { toast } from 'react-toastify'
 import { getMyWallet, listMyPayoutRequests, createPayoutRequest } from '~/services/ptWalletService'
 
 /** Helpers an toàn khi render */
-const formatVND = (n) => Number(n ?? 0).toLocaleString('vi-VN')
+const formatVND = (n) => Number(n ?? 0).toLocaleString('vi-VN',  { minimumFractionDigits: 0, maximumFractionDigits: 0 })
 const safeDateTime = (d) => (d ? new Date(d).toLocaleString('vi-VN') : '—')
 
 function WithdrawModal({ open, onClose, onCreated }) {

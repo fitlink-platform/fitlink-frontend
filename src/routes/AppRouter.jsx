@@ -43,6 +43,8 @@ import PTPackageEdit from '~/pages/pt/PTPackageEdit'
 import PTWallet from '~/pages/pt/PTWalletPage'
 import AdminPayouts from '~/pages/admin/AdminPayouts'
 import PTMaterialsPage from '~/pages/pt/PTMaterialsPage'
+import PTFeedback from '~/pages/pt/PTFeedbackPage'
+import PTApprovalPage from '~/pages/pt/PTApprovalPage'
 
 export default function AppRouter() {
   return (
@@ -154,14 +156,6 @@ export default function AppRouter() {
         }
       />
       <Route
-        path="/pt/packages/new"
-        element={
-          <PrivateRoute allowedRoles={['pt']}>
-            <PTCreatePackage />
-          </PrivateRoute>
-        }
-      />
-      <Route
         path="/pt/packages/:packageId"
         element={
           <PrivateRoute allowedRoles={['pt']}>
@@ -210,6 +204,7 @@ export default function AppRouter() {
       {/* Student có thể dùng cùng page này nếu muốn, hoặc tách ra layout khác */}
       <Route path="/pt/students" element={<PTStudents />} />
       <Route path="/pt/wallet" element={<PTWallet />} />
+      <Route path="/pt/feedback" element={<PTFeedback />} />
       <Route path="/notifications" element={<NotificationsPage />} />
       <Route
         path="/pt/chat"
@@ -219,6 +214,10 @@ export default function AppRouter() {
           </PrivateRoute>
         }
       />
+      <Route path="/pt/approval-request" element={<PTApprovalPage />} />
+
+
+      
 
       <Route path="/chat" element={<MessagePage />} />
     </Routes>

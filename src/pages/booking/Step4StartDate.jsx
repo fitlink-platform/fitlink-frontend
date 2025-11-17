@@ -7,10 +7,9 @@ const Chip = ({ active, onClick, children }) => (
   <button
     onClick={onClick}
     className={`px-3 py-2 rounded-xl border text-sm mr-2 mb-2 transition-all
-      ${
-        active
-          ? "bg-red-600/20 border-red-500 text-red-200 shadow-[0_4px_14px_rgba(220,38,38,0.25)]"
-          : "bg-neutral-900/60 border-neutral-700 text-neutral-300 hover:bg-neutral-800"
+      ${active
+        ? "bg-red-600/20 border-red-500 text-red-200 shadow-[0_4px_14px_rgba(220,38,38,0.25)]"
+        : "bg-neutral-900/60 border-neutral-700 text-neutral-300 hover:bg-neutral-800"
       }`}
   >
     {children}
@@ -60,8 +59,9 @@ export default function Step4StartDate({ onBack, onNext }) {
 
       {/* Nhập tay */}
       <div>
-        <div className="text-sm text-neutral-400 mb-1">Hoặc chọn ngày khác</div>
+        {/* <div className="text-sm text-neutral-400 mb-1">Hoặc chọn ngày khác</div> */}
         <input
+          hidden={true}
           type="date"
           value={state.startDate || ""}
           onChange={(e) => set({ startDate: e.target.value })}

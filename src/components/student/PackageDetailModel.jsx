@@ -147,6 +147,17 @@ export default function PackageDetailModal({ pkg, onClose }) {
               </p>
             </div>
 
+            <div className="rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm">
+              <div className="font-semibold text-gray-900 mb-1">
+                 Hỗ Trợ
+              </div>
+              <ul className="list-disc pl-5 space-y-1 text-gray-600">      
+                <li>
+                  Gói sẽ hỗ trợ tiền vào cửa nếu chọn mua gói tại phòng tập
+                </li>              
+              </ul>
+            </div>
+
             {/* Điều khoản */}
             <div className="rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm">
               <div className="font-semibold text-gray-900 mb-1">

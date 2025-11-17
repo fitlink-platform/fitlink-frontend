@@ -2,9 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import axiosClient from '../api/axiosClient'; // Sử dụng axiosClient cho truy vấn giao dịch
-import { useLocation, Link } from 'react-router-dom'; 
+import { useLocation, Link, useNavigate } from 'react-router-dom'; 
 
 function SuccessPage() {
+    const navigate = useNavigate();
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
     
@@ -58,11 +59,11 @@ function SuccessPage() {
 
             {isPaid && (
                 <div style={{ marginTop: '30px' }}>
-                    <Link to="/student/packages" style={{ textDecoration: 'none' }}>
-                        <button style={{ padding: '10px 20px', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>
-                            Xem Gói Tập Đã Mua
+                    {/* <Link to="/" }> */}
+                        <button onClick={()=> navigate('/training-calendar')} style={{ padding: '10px 20px', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', textDecoration: 'none' }}>
+                            Back Home
                         </button>
-                    </Link>
+                    {/* </Link> */}
                 </div>
             )}
              {!isPaid && (
