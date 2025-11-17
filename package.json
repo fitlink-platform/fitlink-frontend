@@ -20,7 +20,6 @@
     "@fullcalendar/timegrid": "^6.1.19",
     "@hookform/resolvers": "^5.1.1",
     "@react-oauth/google": "^0.12.2",
-    "@tailwindcss/vite": "^4.1.10",
     "axios": "^1.13.2",
     "chart.js": "^4.5.0",
     "date-fns": "^4.1.0",
