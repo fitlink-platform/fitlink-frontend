@@ -1,5 +1,5 @@
 {
-  "name": "pet-spa-app",
+  "name": "fit-link-platform",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -21,6 +21,7 @@
     "axios": "^1.13.2",
     "chart.js": "^4.5.0",
     "date-fns": "^4.1.0",
+    "framer-motion": "^12.23.24",
     "lottie-react": "^2.4.1",
     "lucide-react": "^0.525.0",
     "maplibre-gl": "^5.9.0",

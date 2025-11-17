@@ -25,6 +25,10 @@ export const cancelMyPending = async () => {
   return res.data
 }
 
+export const ptGetMyLatestRequest = async () => {
+  const res = await axios.get('/pt/approval-requests/my')
+}
+
 export default {
   submitReview,
   listMyRequests,
