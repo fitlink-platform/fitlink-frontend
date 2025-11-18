@@ -8,7 +8,7 @@ import {
   FaClipboardList,
   FaCalendarAlt,
   FaSignOutAlt,
-  FaMoneyCheckAlt,
+  FaMoneyCheckAlt
 } from 'react-icons/fa'
 import { useState } from 'react'
 
