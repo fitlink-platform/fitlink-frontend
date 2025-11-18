@@ -317,6 +317,13 @@ export default function PTList() {
       const v = filterAvail === "true";
       rows = rows.filter((r) => (r.availableForNewClients ?? false) === v);
     }
+    rows.sort((a, b) => Number(b.verified) - Number(a.verified));
+    rows.sort(
+      (a, b) =>
+        Number(Boolean(b.availableForNewClients)) -
+        Number(Boolean(a.availableForNewClients))
+    );
+
     if (sortBy === "rating") rows.sort((a, b) => (b.ratingAvg ?? 0) - (a.ratingAvg ?? 0));
     else if (sortBy === "exp") rows.sort((a, b) => (b.yearsExperience ?? 0) - (a.yearsExperience ?? 0));
     return rows;

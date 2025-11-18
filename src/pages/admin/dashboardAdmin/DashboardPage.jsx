@@ -2,63 +2,59 @@ import React, { useEffect, useMemo, useState } from "react";
 import SidebarAdmin from "~/components/SidebarAdmin";
 import axiosClient from "~/api/axiosClient";
 
-function StatCard({ title, value }) {
+/* ====================== UI COMPONENTS ====================== */
+
+function StatCard({ title, value, subtitle }) {
   return (
     <div className="flex-1 min-w-[220px] bg-slate-900 border border-slate-800 rounded-xl p-4 shadow text-white">
-      <div className="text-sm text-gray-400">{title}</div>
-      <div className="mt-1 text-3xl font-bold">{value.toLocaleString("en-US")}</div>
+      <div className="text-xs uppercase tracking-wide text-gray-400">
+        {title}
+      </div>
+      <div className="mt-1 text-3xl font-bold">
+        {Number(value || 0).toLocaleString("en-US")}
+      </div>
+      {subtitle && (
+        <div className="mt-1 text-xs text-gray-500">{subtitle}</div>
+      )}
     </div>
   );
 }
 
-function StatusTag({ verified }) {
-  return verified ? (
-    <span className="px-2 py-1 bg-green-600/30 border border-green-500 rounded text-green-400 text-xs font-semibold">
-      Approved
-    </span>
-  ) : (
-    <span className="px-2 py-1 bg-gray-600/30 border border-gray-500 rounded text-gray-400 text-xs font-semibold">
-      Pending
-    </span>
-  );
-}
-
 function MiniBarChart({ data, labels }) {
-  const max = Math.max(1, ...data);
-  const width = 300,
-    height = 100;
-  const barW = 50;
+  const max = useMemo(() => Math.max(1, ...data), [data]);
+  const height = 180;
+  const barW = 45;
+  const chartWidth = labels.length * (barW + 40);
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow text-gray-200">
-      <div className="text-sm text-gray-400 mb-2">Overview Chart</div>
-      <svg width={width} height={height}>
+    <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow text-gray-200 w-full">
+      <div className="text-xs uppercase tracking-wide text-gray-400 mb-3">
+        Overview Chart
+      </div>
+
+      <svg width="100%" height={height} viewBox={`0 0 ${chartWidth} ${height}`}>
         {data.map((v, i) => {
-          const h = (v / max) * 70;
+          const h = (v / max) * 110;
+          const x = 20 + i * (barW + 40);
+          const y = height - h - 30;
+
           return (
             <g key={i}>
-              <rect
-                x={30 + i * (barW + 20)}
-                y={height - h - 15}
-                width={barW}
-                height={h}
-                rx="6"
-                fill="#f97316"
-              />
+              <rect x={x} y={y} width={barW} height={h} rx="8" fill="#f97316" />
               <text
-                x={30 + i * (barW + 20) + barW / 2}
-                y={height - 7}
+                x={x + barW / 2}
+                y={height - 10}
                 textAnchor="middle"
-                fontSize="10"
+                fontSize="12"
                 fill="#94a3b8"
               >
                 {labels[i]}
               </text>
               <text
-                x={30 + i * (barW + 20) + barW / 2}
-                y={height - h - 15}
+                x={x + barW / 2}
+                y={y - 6}
                 textAnchor="middle"
-                fontSize="10"
+                fontSize="12"
                 fill="#e2e8f0"
               >
                 {v}
@@ -71,23 +67,33 @@ function MiniBarChart({ data, labels }) {
   );
 }
 
+function MetricChip({ label, value, unit }) {
+  return (
+    <div className="bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-gray-200 flex flex-col gap-1">
+      <span className="text-xs text-gray-400">{label}</span>
+      <span className="text-lg font-semibold">
+        {Number.isFinite(value) ? value.toFixed(2) : "0"}
+        {unit && <span className="text-xs text-gray-400 ml-1">{unit}</span>}
+      </span>
+    </div>
+  );
+}
+
+/* ====================== MAIN PAGE ====================== */
+
 export default function DashboardPage() {
   const [overview, setOverview] = useState({});
-  const [users, setUsers] = useState([]);
-  const [students, setStudents] = useState([]);
+  const [totalAccounts, setTotalAccounts] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
       try {
         const res = await axiosClient.get("/admin/overview");
-        setOverview(res.data);
+        setOverview(res.data || {});
 
         const usersRes = await axiosClient.get("/admin/users");
-        setUsers(usersRes.data);
-
-        const studentsRes = await axiosClient.get("/admin/students");
-        setStudents(studentsRes.data || []);
+        setTotalAccounts(usersRes.data.length);
       } catch (err) {
         console.error(err);
       } finally {
@@ -96,150 +102,194 @@ export default function DashboardPage() {
     })();
   }, []);
 
-  const userById = useMemo(() => {
-    const map = new Map();
-    users.forEach((u) => map.set(String(u._id), u));
-    return map;
-  }, [users]);
+  const totals = useMemo(() => {
+    const totalPTs = Number(overview.totalPTs || 0);
+    const totalStudents = Number(overview.totalStudents || 0);
+    const totalBookings = Number(overview.totalBookings || 0);
 
-  const allPTs = (overview.approvedPTs || []).map((p) => {
-    const u = userById.get(String(p.user)) || {};
+    const approvedRaw =
+      typeof overview.approvedPTs === "number"
+        ? overview.approvedPTs
+        : Array.isArray(overview.approvedPTs)
+        ? overview.approvedPTs.length
+        : 0;
+
+    const approvedPTs = Number(approvedRaw || 0);
+    const pendingPTs = Math.max(totalPTs - approvedPTs, 0);
+
+    const approvalRate =
+      totalPTs > 0 ? Math.round((approvedPTs / totalPTs) * 100) : 0;
+
+    const studentPTRatio = totalPTs > 0 ? totalStudents / totalPTs : 0;
+    const bookingsPTRatio = totalPTs > 0 ? totalBookings / totalPTs : 0;
+    const bookingsStudentRatio =
+      totalStudents > 0 ? totalBookings / totalStudents : 0;
+
     return {
-      id: p.user,
-      name: u.name || "(Not updated)",
-      email: u.email,
-      phone: u.phone,
-      experience: p.yearsExperience || 0,
-      rating: p.ratingAvg || 0,
-      count: p.ratingCount || 0,
-      verified: p.verified || false,
+      totalPTs,
+      totalStudents,
+      totalBookings,
+      approvedPTs,
+      pendingPTs,
+      approvalRate,
+      studentPTRatio,
+      bookingsPTRatio,
+      bookingsStudentRatio,
     };
-  });
+  }, [overview]);
 
-  if (loading)
+  if (loading) {
     return (
       <div className="flex min-h-screen bg-slate-900 text-white justify-center items-center">
-        Loading data...
+        Loading dashboard...
       </div>
     );
+  }
 
   return (
     <div className="flex min-h-screen bg-slate-900 text-white">
       <SidebarAdmin />
-      <div className="flex-1 p-8 space-y-6">
-        <h1 className="text-3xl font-bold text-orange-400">Admin Dashboard</h1>
-        <p className="text-sm text-gray-400">
-          Overview of the system: PTs, Students, and Bookings
-        </p>
 
-        {/* Statistic Section */}
-        <div className="flex flex-wrap gap-4">
-          <StatCard title="Total PTs" value={overview.totalPTs || 0} />
-          <StatCard title="Students" value={overview.totalStudents || 0} />
-          <StatCard title="Bookings" value={overview.totalBookings || 0} />
-          <MiniBarChart
-            data={[
-              overview.totalPTs || 0,
-              overview.totalStudents || 0,
-              overview.totalBookings || 0,
-            ]}
-            labels={["PT", "Student", "Booking"]}
+      <div className="flex-1 p-8 space-y-6">
+        {/* Header */}
+        <div>
+          <h1 className="text-3xl font-bold text-orange-400">
+            Admin Dashboard
+          </h1>
+          <p className="text-sm text-gray-400 mt-1">
+            Overview of the system: PTs, Students, Bookings and Accounts
+          </p>
+        </div>
+
+        {/* Stats */}
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <StatCard
+            title="Total PTs"
+            value={totals.totalPTs}
+            subtitle={`${totals.approvedPTs} approved · ${totals.pendingPTs} pending`}
+          />
+          <StatCard
+            title="Students"
+            value={totals.totalStudents}
+            subtitle={`Student / PT ratio: ${totals.studentPTRatio.toFixed(2)}`}
+          />
+          <StatCard
+            title="Bookings"
+            value={totals.totalBookings}
+            subtitle={`Per PT: ${totals.bookingsPTRatio.toFixed(
+              2
+            )} · Per student: ${totals.bookingsStudentRatio.toFixed(2)}`}
+          />
+          <StatCard
+            title="Total Accounts"
+            value={totalAccounts}
+            subtitle="Includes admins, PTs and students"
           />
         </div>
 
-        {/* PT Table */}
-        <div className="bg-slate-800 rounded-xl shadow border border-slate-700">
-          <div className="p-4 border-b border-slate-700 flex justify-between items-center">
-            <h2 className="text-lg font-semibold text-orange-400">PT List</h2>
-            <span className="text-sm text-gray-400">{allPTs.length} results</span>
+        {/* PT Summary + System */}
+        <div className="grid gap-4 lg:grid-cols-3">
+          <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow lg:col-span-2">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <div className="text-xs uppercase tracking-wide text-gray-400">
+                  PT Summary
+                </div>
+                <div className="text-sm text-gray-500">
+                  {totals.approvedPTs} approved / {totals.totalPTs} total
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-xs text-gray-400 mb-1">Approval rate</div>
+                <div className="text-2xl font-semibold text-orange-400">
+                  {totals.approvalRate}%
+                </div>
+              </div>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-3 text-sm text-gray-200">
+              <div className="bg-slate-800/60 rounded-lg p-3 border border-slate-700/60">
+                <div className="text-xs text-gray-400">Approved PTs</div>
+                <div className="mt-1 text-lg font-semibold">
+                  {totals.approvedPTs}
+                </div>
+              </div>
+
+              <div className="bg-slate-800/60 rounded-lg p-3 border border-slate-700/60">
+                <div className="text-xs text-gray-400">Pending PTs</div>
+                <div className="mt-1 text-lg font-semibold">
+                  {totals.pendingPTs}
+                </div>
+              </div>
+
+              <div className="bg-slate-800/60 rounded-lg p-3 border border-slate-700/60">
+                <div className="text-xs text-gray-400">Total PTs</div>
+                <div className="mt-1 text-lg font-semibold">
+                  {totals.totalPTs}
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-5">
+              <div className="flex justify-between text-xs text-gray-400 mb-1">
+                <span>Approval progress</span>
+                <span>{totals.approvalRate}%</span>
+              </div>
+              <div className="h-2 rounded-full bg-slate-700 overflow-hidden max-w-xl">
+                <div
+                  className="h-full bg-orange-500"
+                  style={{ width: `${totals.approvalRate}%` }}
+                />
+              </div>
+            </div>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-sm text-gray-200">
-              <thead className="bg-slate-700 text-gray-100">
-                <tr>
-                  <th className="p-3 text-left">Name</th>
-                  <th className="p-3 text-left">Email</th>
-                  <th className="p-3 text-left">Phone</th>
-                  <th className="p-3 text-left">Experience</th>
-                  <th className="p-3 text-left">Rating</th>
-                  <th className="p-3 text-left">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {allPTs.length > 0 ? (
-                  allPTs.slice(0, 10).map((pt) => (
-                    <tr
-                      key={pt.id}
-                      className="border-t border-slate-700 hover:bg-slate-700/60 transition"
-                    >
-                      <td className="p-3">{pt.name}</td>
-                      <td className="p-3">{pt.email || "—"}</td>
-                      <td className="p-3">{pt.phone || "—"}</td>
-                      <td className="p-3">{pt.experience} yrs</td>
-                      <td className="p-3">
-                        {pt.rating.toFixed(1)}{" "}
-                        <span className="text-xs text-gray-400">({pt.count})</span>
-                      </td>
-                      <td className="p-3">
-                        <StatusTag verified={pt.verified} />
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={6} className="text-center p-4 text-gray-400">
-                      No PTs available
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+          <div className="flex flex-col gap-4">
+            <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow text-sm text-gray-200">
+              <div className="text-xs uppercase tracking-wide text-gray-400 mb-3">
+                System Overview
+              </div>
+
+              <ul className="space-y-1">
+                <li className="flex justify-between">
+                  <span>Total Accounts</span>
+                  <span className="font-semibold">
+                    {totalAccounts.toLocaleString("en-US")}
+                  </span>
+                </li>
+                <li className="flex justify-between">
+                  <span>Total PTs</span>
+                  <span className="font-semibold">
+                    {totals.totalPTs.toLocaleString("en-US")}
+                  </span>
+                </li>
+                <li className="flex justify-between">
+                  <span>Total Students</span>
+                  <span className="font-semibold">
+                    {totals.totalStudents.toLocaleString("en-US")}
+                  </span>
+                </li>
+                <li className="flex justify-between">
+                  <span>Total Bookings</span>
+                  <span className="font-semibold">
+                    {totals.totalBookings.toLocaleString("en-US")}
+                  </span>
+                </li>
+              </ul>
+            </div>
+
+            <MiniBarChart
+              data={[totals.totalPTs, totals.totalStudents, totals.totalBookings]}
+              labels={["PT", "Student", "Booking"]}
+            />
           </div>
         </div>
 
-        {/* Student Table */}
-        <div className="bg-slate-800 rounded-xl shadow border border-slate-700 mt-6">
-          <div className="p-4 border-b border-slate-700 flex justify-between items-center">
-            <h2 className="text-lg font-semibold text-orange-400">Student List</h2>
-            <span className="text-sm text-gray-400">{students.length} results</span>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-sm text-gray-200">
-              <thead className="bg-slate-700 text-gray-100">
-                <tr>
-                  <th className="p-3 text-left">Name</th>
-                  <th className="p-3 text-left">Email</th>
-                  <th className="p-3 text-left">Gender</th>
-                  <th className="p-3 text-left">Goals</th>
-                </tr>
-              </thead>
-              <tbody>
-                {students.length > 0 ? (
-                  students.slice(0, 10).map((s, index) => (
-                    <tr
-                      key={index}
-                      className="border-t border-slate-700 hover:bg-slate-700/60 transition"
-                    >
-                      <td className="p-3">{s.name || "—"}</td>
-                      <td className="p-3">{s.email || "—"}</td>
-                      <td className="p-3 capitalize">{s.gender || "—"}</td>
-                      <td className="p-3">
-                        {s.goals?.length ? s.goals.join(", ") : "—"}
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={4} className="text-center p-4 text-gray-400">
-                      No students available
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+        {/* Ratios bottom */}
+        <div className="grid gap-4 md:grid-cols-3">
+          <MetricChip label="Student / PT ratio" value={totals.studentPTRatio} />
+          <MetricChip label="Bookings / PT" value={totals.bookingsPTRatio} />
+          <MetricChip label="Bookings / Student" value={totals.bookingsStudentRatio} />
         </div>
       </div>
     </div>
