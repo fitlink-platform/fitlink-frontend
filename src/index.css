@@ -54,7 +54,6 @@ main::-webkit-scrollbar-thumb {
   display: none !important;
 }
 
-
 @keyframes card-fade-up {
   0% {
     opacity: 0;
