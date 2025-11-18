@@ -134,7 +134,7 @@ export default function Navbar() {
                 <li
                   className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                   onClick={() => {
-                    navigate('/customer/orders')
+                    navigate('/my-packages')
                     setIsProfileOpen(false)
                   }}
                 >

@@ -45,7 +45,7 @@ import AdminPayouts from '~/pages/admin/AdminPayouts'
 import PTMaterialsPage from '~/pages/pt/PTMaterialsPage'
 import PTFeedback from '~/pages/pt/PTFeedbackPage'
 import PTApprovalPage from '~/pages/pt/PTApprovalPage'
-
+import MyPackage from '~/components/MyPackage'
 export default function AppRouter() {
   return (
     <Routes>
@@ -57,6 +57,7 @@ export default function AppRouter() {
       <Route path="/verify-email" element={<VerifyEmail />} />
       <Route path="/list-pt" element={<SearchPTs />} />
       <Route path="/training-calendar" element={<TrainingCalendar />} />
+      <Route path="/my-packages" element={<MyPackage />} />
       <Route
         path="/profile"
         element={
@@ -79,7 +80,6 @@ export default function AppRouter() {
           </PrivateRoute>
         }
       />
-
       <Route
         path="/chat/:ptId"
         element={
@@ -89,7 +89,6 @@ export default function AppRouter() {
         }
       />
       <Route path="/chat-ai" element={<ChatAIPage />} />
-
       {/* Trainer - Nguyen */}
       <Route path="/trainer/:id" element={<PTDetail />} />
       <Route path="/pt/:id" element={<PTDetail />} />
@@ -171,7 +170,6 @@ export default function AppRouter() {
           </PrivateRoute>
         }
       />
-
       <Route
         path="/pt/packages/new"
         element={
@@ -197,7 +195,6 @@ export default function AppRouter() {
         }
       />
       <Route path="/payment/result" element={<PaymentResult />} />
-
       {/* ... */}
       <Route path="/pt/schedule1" element={<MyCalendar />} />
       <Route path="/pt/schedule" element={<PTSchedule />} />
@@ -215,10 +212,6 @@ export default function AppRouter() {
         }
       />
       <Route path="/pt/approval-request" element={<PTApprovalPage />} />
-
-
-      
-
       <Route path="/chat" element={<MessagePage />} />
     </Routes>
   )
