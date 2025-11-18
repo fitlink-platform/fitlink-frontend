@@ -4,6 +4,8 @@ import PTMainLayout from "~/layouts/pt/PTMainLayout";
 import { getMyWallet } from "~/services/ptWalletService";
 import { useEffect, useState } from "react";
 
+const formatVND = (n) => Number(n ?? 0).toLocaleString('vi-VN',  { minimumFractionDigits: 0, maximumFractionDigits: 0 })
+
 // --- small UI components ---
 function StatCard({ title, value, sub, children }) {
   return (
@@ -157,7 +159,8 @@ export default function PTDashboard() {
         <StatCard title="Sessions today" value="5" sub="2 completed">
           <FaCalendarAlt />
         </StatCard>
-        <StatCard title="Wallet balance" value={`${balance.toLocaleString()}₫`} sub="Ready to payout">
+
+        <StatCard title="Wallet balance" value={`${formatVND(balance)}₫`} sub="Ready to payout">
           <FaWallet />
         </StatCard>
         <StatCard title="Avg rating" value="4.8★" sub="128 reviews">
