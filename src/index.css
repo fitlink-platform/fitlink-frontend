@@ -45,6 +45,15 @@ main::-webkit-scrollbar-thumb {
   border-radius: 9999px;
 }
 
+/* Xóa sạch mọi pseudo-element trong trang admin */
+.admin-wrapper *::before,
+.admin-wrapper *::after {
+  content: none !important;
+  background: none !important;
+  border: none !important;
+  display: none !important;
+
+
 @keyframes card-fade-up {
   0% {
     opacity: 0;
@@ -58,4 +67,5 @@ main::-webkit-scrollbar-thumb {
 
 .animate-card-fade-up {
   animation: card-fade-up 0.35s ease-out forwards;
+
 }
