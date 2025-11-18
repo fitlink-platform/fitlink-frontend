@@ -5,6 +5,12 @@ import { searchPTs } from "~/services/searchService";
 import { PackageTagLabels } from "~/domain/enum";
 import MainLayout from "~/layouts/MainLayout";
 
+const modeLabels = {
+  atPtGym: "Tại PT's Gym",
+  atClient: "Tại nhà khách",
+  atOtherGym: "Gym khác",
+};
+
 export default function SearchPTs() {
   const navigate = useNavigate();
   const [pts, setPTs] = useState([]);
@@ -13,7 +19,7 @@ export default function SearchPTs() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [page, setPage] = useState(1);
-  const [limit] = useState(9);
+  const [limit, setLimit] = useState(9);
   const [total, setTotal] = useState(0);
 
   // Location + mode
@@ -55,8 +61,7 @@ export default function SearchPTs() {
           const res = await fetch(url);
           const data = await res.json();
           const addr = data?.address || {};
-          const line =
-            addr.city || addr.town || addr.state || data?.display_name || "";
+          const line = addr.city || addr.town || addr.state || data?.display_name || "";
           setDetectedInfo(`Detected: ${line || latLon}`);
         } catch {
           setDetectedInfo(`Detected coordinates: ${latLon}`);
@@ -133,9 +138,7 @@ export default function SearchPTs() {
   };
 
   useEffect(() => {
-    if (!showLocationScreen && (area || coords) && selectedMode) {
-      fetchPTs();
-    }
+    if (!showLocationScreen && (area || coords) && selectedMode) fetchPTs();
   }, [
     availableAt,
     sortBy,
@@ -159,119 +162,113 @@ export default function SearchPTs() {
     fetchPTs();
   };
 
-  // =============== SETUP SCREEN ===============
+  /* ========== SETUP LOCATION SCREEN ========== */
   if (showLocationScreen) {
     return (
       <MainLayout>
-        <div className="min-h-screen bg-gradient-to-b from-orange-50 via-orange-50/60 to-white text-gray-800 flex flex-col pt-20">
-          <div className="max-w-5xl mx-auto w-full px-4 lg:px-0">
+        <div className="min-h-screen bg-gradient-to-b from-orange-50 via-white to-white flex flex-col pt-12">
+          <div className="px-6 md:px-10 mb-4">
             <button
               onClick={() => setShowLocationScreen(false)}
-              className="inline-flex items-center text-sm font-medium text-orange-600 hover:text-orange-700 transition-colors mb-6 group"
+              className="inline-flex items-center gap-1 text-sm font-medium text-orange-600 hover:text-orange-700 transition-colors"
             >
-              <span className="mr-1 transition-transform group-hover:-translate-x-0.5">
-                ←
-              </span>
-              Back to Trainers
+              <span>←</span>
+              <span>Back to trainers</span>
             </button>
+          </div>
 
-            <div className="flex flex-col items-center justify-center pb-12">
-              <div className="w-full bg-white/90 backdrop-blur rounded-3xl shadow-[0_18px_45px_rgba(15,23,42,0.12)] p-8 md:p-10 border border-orange-100/70 relative overflow-hidden">
-                <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-orange-100/60 blur-3xl" />
-                <div className="pointer-events-none absolute -left-10 -bottom-10 h-40 w-40 rounded-full bg-amber-100/70 blur-3xl" />
+          <div className="flex-1 flex items-center justify-center px-4 pb-10">
+            <div className="w-full max-w-xl bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl border border-orange-100 px-7 py-8 md:px-10 md:py-10 animate-card-fade-up">
+              <div className="text-center mb-6">
+                <p className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-50 text-[11px] font-semibold text-orange-600 mb-3">
+                  <span>📍</span>
+                  <span>Step 1 · Chọn khu vực & chế độ tập</span>
+                </p>
+                <h1 className="text-2xl md:text-3xl font-bold text-slate-900 mb-1">
+                  Tìm <span className="text-orange-600">Personal Trainer</span> gần bạn
+                </h1>
+                <p className="text-sm text-slate-500">
+                  Chọn tỉnh / thành hoặc dùng GPS để chúng mình gợi ý PT phù hợp hơn 🧭
+                </p>
+              </div>
 
-                <div className="relative z-10">
-                  <h1 className="text-3xl md:text-4xl font-extrabold text-center text-slate-900 mb-2 tracking-tight">
-                    Find{" "}
-                    <span className="text-orange-600">Personal Trainers</span>{" "}
-                    near you
-                  </h1>
-                  <p className="text-gray-500 text-center text-sm md:text-base mb-8">
-                    Set your location so we can show you the best coaches around
-                    you. You can always update this later.
-                  </p>
-
-                  <div className="grid md:grid-cols-2 gap-6 mb-6">
-                    {/* Select area */}
-                    <div>
-                      <label className="block text-sm font-semibold text-slate-700 mb-2">
-                        Province / City
-                      </label>
-                      <select
-                        value={area}
-                        onChange={(e) => {
-                          setArea(e.target.value);
-                          if (e.target.value) {
-                            setCoords("");
-                            localStorage.removeItem("studentCoords");
-                          }
-                        }}
-                        className="w-full bg-gray-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-400/70 focus:border-orange-400 transition-shadow"
-                      >
-                        <option value="">-- Choose Province/City --</option>
-                        {provinces.map((p) => (
-                          <option key={p} value={p}>
-                            {p}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    {/* Coordinates */}
-                    <div>
-                      <label className="block text-sm font-semibold text-slate-700 mb-2">
-                        Or coordinates (Latitude, Longitude)
-                      </label>
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          value={coords}
-                          onChange={(e) => setCoords(e.target.value)}
-                          placeholder="e.g., 15.96810, 108.26340"
-                          className="w-full bg-gray-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-400/70 focus:border-orange-400 transition-shadow"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col md:flex-row gap-3 mb-6">
-                    <button
-                      onClick={detectLocation}
-                      disabled={detecting}
-                      className="flex-1 inline-flex items-center justify-center bg-orange-500 hover:bg-orange-600 disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold py-2.5 rounded-xl text-sm md:text-base shadow-md shadow-orange-500/30 transition-all hover:shadow-lg hover:-translate-y-0.5"
-                    >
-                      {detecting ? "Detecting..." : "📍 Use My Location"}
-                    </button>
-                    <button
-                      onClick={() => {
-                        if (!coords) {
-                          alert("No coordinates to save yet.");
-                          return;
-                        }
-                        localStorage.setItem("studentCoords", coords);
-                        alert(`Saved: ${coords}`);
-                      }}
-                      className="flex-1 inline-flex items-center justify-center bg-slate-900 hover:bg-slate-950 text-white font-semibold py-2.5 rounded-xl text-sm md:text-base shadow-md shadow-slate-900/25 transition-all hover:shadow-lg hover:-translate-y-0.5"
-                    >
-                      💾 Save Location
-                    </button>
-                  </div>
-
-                  <button
-                    onClick={handleConfirmArea}
-                    disabled={!area && !coords}
-                    className="w-full bg-orange-600 hover:bg-orange-500 disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-2xl text-sm md:text-base tracking-wide shadow-lg shadow-orange-500/30 transition-all hover:-translate-y-0.5"
+              {/* Select area */}
+              <div className="space-y-4 mb-6">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 uppercase mb-1.5">
+                    Tỉnh / thành
+                  </label>
+                  <select
+                    value={area}
+                    onChange={(e) => {
+                      setArea(e.target.value);
+                      if (e.target.value) {
+                        setCoords("");
+                        localStorage.removeItem("studentCoords");
+                      }
+                    }}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition-shadow"
                   >
-                    🔎 Confirm & Search Trainers
-                  </button>
+                    <option value="">-- Chọn tỉnh / thành --</option>
+                    {provinces.map((p) => (
+                      <option key={p} value={p}>
+                        {p}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-                  {detectedInfo && (
-                    <p className="text-center text-xs md:text-sm text-gray-500 mt-4">
-                      {detectedInfo}
-                    </p>
-                  )}
+                {/* Coordinates */}
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 uppercase mb-1.5">
+                    Hoặc nhập toạ độ
+                  </label>
+                  <input
+                    type="text"
+                    value={coords}
+                    onChange={(e) => setCoords(e.target.value)}
+                    placeholder="VD: 15.96810, 108.26340"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition-shadow"
+                  />
                 </div>
               </div>
+
+              <div className="flex flex-col md:flex-row gap-3 mb-5">
+                <button
+                  onClick={detectLocation}
+                  disabled={detecting}
+                  className="flex-1 inline-flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 disabled:opacity-60 text-white py-2.5 rounded-xl text-sm font-semibold shadow-md hover:shadow-lg transition-all"
+                >
+                  <span>📡</span>
+                  <span>{detecting ? "Đang xác định vị trí..." : "Dùng vị trí hiện tại"}</span>
+                </button>
+                <button
+                  onClick={() => {
+                    if (!coords) {
+                      alert("Chưa có toạ độ để lưu.");
+                      return;
+                    }
+                    localStorage.setItem("studentCoords", coords);
+                    alert(`Đã lưu toạ độ: ${coords}`);
+                  }}
+                  className="flex-1 inline-flex items-center justify-center gap-2 bg-slate-900 hover:bg-black text-white py-2.5 rounded-xl text-sm font-medium shadow-md hover:shadow-lg transition-all"
+                >
+                  <span>💾</span>
+                  <span>Lưu toạ độ</span>
+                </button>
+              </div>
+
+              <button
+                onClick={handleConfirmArea}
+                disabled={!area && !coords}
+                className="w-full bg-orange-600 hover:bg-orange-500 disabled:opacity-60 text-white font-semibold py-3 rounded-xl text-base shadow-md hover:shadow-lg transition-all"
+              >
+                🔎 Xác nhận & tìm PT
+              </button>
+
+              {detectedInfo && (
+                <p className="text-center text-xs text-slate-500 mt-4">{detectedInfo}</p>
+              )}
             </div>
           </div>
         </div>
@@ -279,287 +276,353 @@ export default function SearchPTs() {
     );
   }
 
-  // =============== MAIN PAGE ===============
+  /* ========== MAIN PAGE ========== */
+  const totalPages = Math.max(1, Math.ceil(total / limit));
+
   return (
     <MainLayout>
-      <div className="min-h-screen bg-gradient-to-b from-orange-50 via-orange-50/60 to-white text-gray-900 pt-24 pb-16">
-        <div className="max-w-7xl mx-auto px-4 lg:px-0 space-y-8">
-          {/* Header */}
-          <section className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-            <div className="space-y-2">
-              <p className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-orange-500 bg-orange-100/70 px-3 py-1 rounded-full">
-                Personal Trainers
-                <span className="h-1 w-1 rounded-full bg-orange-500" />
-              </p>
-              <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">
-                Find the right coach for{" "}
-                <span className="text-orange-600">your fitness journey</span>
-              </h1>
-              <p className="text-slate-600 text-sm md:text-base">
-                Area: <span className="font-medium">{area || "Not set"}</span>{" "}
-                · Coordinates:{" "}
-                <span className="font-mono text-xs md:text-sm">
-                  {coords || "—"}
-                </span>{" "}
-                · Mode:{" "}
-                <span className="font-medium">
-                  {selectedMode || "All modes"}
-                </span>
-              </p>
-              {total > 0 && (
-                <p className="text-xs md:text-sm text-slate-500">
-                  Showing{" "}
-                  <span className="font-semibold text-slate-700">
-                    {pts.length}
-                  </span>{" "}
-                  of{" "}
-                  <span className="font-semibold text-slate-700">
-                    {total}
-                  </span>{" "}
-                  trainers found
-                </p>
-              )}
-            </div>
+      <div className="min-h-screen bg-gradient-to-b from-orange-50 via-orange-50/70 to-white text-gray-900 px-4 md:px-6 pt-24 pb-12">
+        <div className="max-w-7xl mx-auto">
 
-            <div className="flex flex-col items-start md:items-end gap-3">
-              <button
-                onClick={() => setShowLocationScreen(true)}
-                className="inline-flex items-center gap-1 text-sm text-orange-600 hover:text-orange-500 underline-offset-4 hover:underline transition-colors"
-              >
-                ✏️ Change area & mode
-              </button>
-              <div className="flex flex-wrap gap-2 text-xs text-slate-500">
-                <span className="inline-flex items-center gap-1 rounded-full bg-white/80 border border-orange-100 px-3 py-1">
-                  ✅ Verified PTs
-                </span>
-                <span className="inline-flex items-center gap-1 rounded-full bg-white/80 border border-slate-100 px-3 py-1">
-                  📍 Location-based search
-                </span>
+          {/* HERO + FILTER trên poster */}
+          <section className="relative mb-10 rounded-3xl overflow-hidden shadow-xl">
+            {/* Background poster */}
+            <div
+              className="absolute inset-0 bg-cover bg-center"
+              style={{ backgroundImage: "url('/poster2.jpg')" }} // hoặc '/poster.jpg'
+            />
+            {/* Overlay màu để chữ dễ đọc */}
+            <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-black/10" />
+
+            {/* Nội dung hero */}
+            <div className="relative px-4 md:px-8 lg:px-10 py-7 md:py-9 flex flex-col gap-5 md:gap-6">
+              {/* Header text */}
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="space-y-1 text-white">
+                  <p className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 text-[11px] font-semibold tracking-wide">
+                    <span>🏋️‍♂️</span>
+                    <span>Discover your Personal Trainer</span>
+                  </p>
+                  <h1 className="text-3xl md:text-4xl font-bold tracking-tight drop-shadow-sm">
+                    Personal Trainers
+                  </h1>
+                  <p className="text-xs md:text-sm text-white/80">
+                    Khu vực hiện tại:{" "}
+                    <span className="font-semibold">
+                      {area || (coords ? "Dựa trên GPS" : "Chưa chọn")}
+                    </span>{" "}
+                    · Toạ độ:{" "}
+                    <span className="font-mono text-[11px]">
+                      {coords || "—"}
+                    </span>{" "}
+                    · Chế độ:{" "}
+                    <span className="font-semibold">
+                      {selectedMode ? modeLabels[selectedMode] : "Chưa chọn"}
+                    </span>
+                  </p>
+                </div>
+
+                <button
+                  onClick={() => setShowLocationScreen(true)}
+                  className="self-start md:self-auto inline-flex items-center gap-2 text-xs md:text-sm text-orange-600 bg-white rounded-full px-3.5 py-1.5 font-medium shadow-md hover:shadow-lg hover:text-orange-700 transition-all"
+                >
+                  ✏️ Change area & mode
+                </button>
               </div>
-            </div>
-          </section>
 
-          {/* Filters */}
-          <section className="bg-white/90 backdrop-blur border border-orange-100/70 rounded-3xl shadow-[0_16px_40px_rgba(15,23,42,0.06)] px-4 py-4 md:px-6 md:py-5">
-            <div className="flex flex-wrap items-center gap-3 md:gap-4">
-              <div className="flex-1 min-w-[180px]">
-                <label className="block text-xs font-medium text-slate-500 mb-1">
-                  Search by name
-                </label>
-                <div className="relative">
-                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs">
-                    🔍
+              {/* Filter card nằm trên poster */}
+              <div className="bg-white/90 backdrop-blur-sm border border-white/60 rounded-2xl shadow-lg px-4 py-4 md:px-6 md:py-5 flex flex-wrap gap-3 items-center">
+                <div className="flex items-center gap-2 border-r border-slate-100 pr-3">
+                  <span className="hidden md:inline text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                    Search
                   </span>
                   <input
                     type="text"
-                    placeholder="e.g., Minh Nguyễn..."
+                    placeholder="Search by name..."
                     value={name}
                     onChange={(e) => {
                       setName(e.target.value);
                       setPage(1);
                     }}
-                    className="w-full bg-gray-50 border border-slate-200 text-slate-800 rounded-xl pl-8 pr-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-400/70 focus:border-orange-400 transition-shadow"
+                    className="bg-slate-50 border border-slate-200 text-slate-800 rounded-xl px-3 py-2 text-sm shadow-inner focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 min-w-[180px]"
                   />
                 </div>
-              </div>
 
-              <div className="flex flex-wrap gap-3 md:gap-4">
-                <div className="min-w-[170px]">
-                  <label className="block text-xs font-medium text-slate-500 mb-1">
-                    Training goal
-                  </label>
-                  <select
-                    value={goal}
-                    onChange={(e) => setGoal(e.target.value)}
-                    className="bg-gray-50 border border-slate-200 text-slate-800 rounded-xl px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-400/70 focus:border-orange-400"
-                  >
-                    <option value="">All goals</option>
-                    {Object.keys(PackageTagLabels).map((key) => (
-                      <option key={key} value={key}>
-                        {key
-                          .charAt(0)
-                          .toUpperCase() +
-                          key
-                            .slice(1)
-                            .replace(/([A-Z])/g, " $1")}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="min-w-[160px]">
-                  <label className="block text-xs font-medium text-slate-500 mb-1">
-                    Training mode
-                  </label>
-                  <select
-                    value={selectedMode}
-                    onChange={(e) => setSelectedMode(e.target.value)}
-                    className="bg-gray-50 border border-slate-200 text-slate-800 rounded-xl px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-400/70 focus:border-orange-400"
-                  >
-                    <option value="">All modes</option>
-                    <option value="atPtGym">At PT's Gym</option>
-                    <option value="atClient">
-                      At Client&apos;s Home / Gym
+                <select
+                  value={goal}
+                  onChange={(e) => {
+                    setGoal(e.target.value);
+                    setPage(1);
+                  }}
+                  className="bg-slate-50 border border-slate-200 text-slate-800 rounded-xl px-3 py-2 text-sm min-w-[170px] shadow-inner focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400"
+                >
+                  <option value="">All goals</option>
+                  {Object.keys(PackageTagLabels).map((key) => (
+                    <option key={key} value={key}>
+                      {PackageTagLabels[key] || key}
                     </option>
-                    <option value="atOtherGym">At Other Gym</option>
-                  </select>
-                </div>
+                  ))}
+                </select>
 
-                <div className="min-w-[150px]">
-                  <label className="block text-xs font-medium text-slate-500 mb-1">
-                    Sort by
-                  </label>
-                  <select
-                    value={sortBy}
-                    onChange={(e) => {
-                      setSortBy(e.target.value);
-                      setPage(1);
-                    }}
-                    className="bg-gray-50 border border-slate-200 text-slate-800 rounded-xl px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-400/70 focus:border-orange-400"
-                  >
-                    <option value="best">Best match</option>
-                    <option value="rating">Highest rating</option>
-                    <option value="price">Lowest price</option>
-                  </select>
+                <select
+                  value={selectedMode}
+                  onChange={(e) => {
+                    setSelectedMode(e.target.value);
+                    setPage(1);
+                  }}
+                  className="bg-slate-50 border border-slate-200 text-slate-800 rounded-xl px-3 py-2 text-sm min-w-[170px] shadow-inner focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400"
+                >
+                  <option value="">All modes</option>
+                  <option value="atPtGym">At PT's Gym</option>
+                  <option value="atClient">At Client's Home / Gym</option>
+                  <option value="atOtherGym">At Other Gym</option>
+                </select>
+
+                <select
+                  value={sortBy}
+                  onChange={(e) => {
+                    setSortBy(e.target.value);
+                    setPage(1);
+                  }}
+                  className="bg-slate-50 border border-slate-200 text-slate-800 rounded-xl px-3 py-2 text-sm min-w-[150px] shadow-inner focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400"
+                >
+                  <option value="best">Best match</option>
+                  <option value="rating">Highest rating</option>
+                  <option value="price">Lowest price</option>
+                </select>
+
+                <div className="ml-auto flex items-center gap-3 text-xs text-slate-500">
+                  <span>
+                    {total > 0 ? `${total} trainers found` : "Chọn filter để tìm PT phù hợp"}
+                  </span>
                 </div>
               </div>
             </div>
           </section>
 
           {/* Results */}
-          <section>
-            {loading ? (
-              <div className="text-center text-slate-500 py-16">
-                <div className="inline-flex flex-col items-center gap-3 animate-pulse">
-                  <div className="h-10 w-10 rounded-full border-2 border-orange-500 border-t-transparent animate-spin" />
-                  <p className="text-sm">Loading trainers...</p>
-                </div>
-              </div>
-            ) : error ? (
-              <div className="text-center text-red-500 py-14 font-medium">
-                {error}
-              </div>
-            ) : pts.length === 0 ? (
-              <div className="text-center text-slate-500 py-16">
-                <p className="text-lg mb-2 font-semibold">
-                  No trainers found 🏋️‍♂️
-                </p>
-
-                {showFallback && (
-                  <div className="mt-4 space-y-3">
-                    <p className="text-sm">
-                      We couldn&apos;t find any trainers near your coordinates.
-                      Try searching by city instead?
-                    </p>
-                    <button
-                      onClick={() => {
-                        setCoords("");
-                        fetchPTs();
-                      }}
-                      className="inline-flex items-center gap-1 px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white rounded-xl text-sm font-semibold shadow-md shadow-orange-500/30 transition-all hover:-translate-y-0.5"
-                    >
-                      🔄 Search by city
-                    </button>
+          {loading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 max-w-5xl gap-6 mx-auto">
+              {Array.from({ length: 6 }).map((_, idx) => (
+                <div
+                  key={idx}
+                  className="h-[260px] bg-white border border-orange-100 rounded-3xl shadow-sm animate-pulse"
+                >
+                  <div className="h-32 bg-slate-100 rounded-t-3xl" />
+                  <div className="p-4 space-y-3">
+                    <div className="h-4 bg-slate-100 rounded w-2/3" />
+                    <div className="h-3 bg-slate-100 rounded w-1/2" />
+                    <div className="h-3 bg-slate-100 rounded w-3/4" />
+                    <div className="h-8 bg-slate-100 rounded-xl w-full" />
                   </div>
-                )}
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-7">
-                {pts.map((pt, index) => (
-                  <article
-                    key={pt._id}
-                    className="group bg-white rounded-3xl border border-orange-100/80 shadow-[0_18px_40px_rgba(15,23,42,0.08)] overflow-hidden transform transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_25px_60px_rgba(15,23,42,0.18)]"
-                    style={{
-                      animation: `fadeInUp 0.45s ease-out ${index * 40}ms both`,
+                </div>
+              ))}
+            </div>
+          ) : error ? (
+            <div className="text-center text-red-500 py-12 font-medium">
+              {error}
+            </div>
+          ) : pts.length === 0 ? (
+            <div className="text-center text-slate-500 py-16">
+              <p className="text-lg font-semibold mb-2">Không tìm thấy PT phù hợp 🧐</p>
+              <p className="text-sm text-slate-500 mb-4">
+                Thử đổi khu vực, chế độ tập hoặc bỏ bớt bộ lọc nhé.
+              </p>
+
+              {showFallback && (
+                <div className="mt-2">
+                  <p className="text-xs mb-3">
+                    Không có PT nào gần bạn theo GPS. Bạn có thể chuyển sang tìm theo tỉnh / thành.
+                  </p>
+                  <button
+                    onClick={() => {
+                      setCoords("");
+                      fetchPTs();
                     }}
+                    className="px-4 py-2 bg-orange-600 hover:bg-orange-500 text-white rounded-full text-sm shadow-md hover:shadow-lg transition-all"
                   >
-                    <div className="relative overflow-hidden">
-                      <img
-                        src={
-                          pt.userInfo?.avatar || "https://placehold.co/400x220"
-                        }
-                        alt={pt.userInfo?.name}
-                        className="w-full h-48 object-cover transform transition-transform duration-500 group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-slate-900/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                      {pt.specialties?.length > 0 && (
-                        <div className="absolute left-3 bottom-3 flex flex-wrap gap-1">
-                          {pt.specialties.slice(0, 2).map((s) => (
-                            <span
-                              key={s}
-                              className="inline-flex items-center rounded-full bg-white/90 text-xs font-semibold text-slate-800 px-2.5 py-1 shadow-sm"
-                            >
-                              {s}
-                            </span>
-                          ))}
+                    🔄 Tìm theo tỉnh / thành
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3 max-w-5xl w-full">
+                {pts.map((pt, index) => {
+                  const rating = pt.ratingAvg || 0;
+                  const ratingRounded = Math.round(rating);
+                  const ratingCount = pt.ratingCount || 0;
+
+                  const modes = [];
+                  if (pt.deliveryModes?.atPtGym) modes.push("atPtGym");
+                  if (pt.deliveryModes?.atClient) modes.push("atClient");
+                  if (pt.deliveryModes?.atOtherGym) modes.push("atOtherGym");
+
+                  const priceText = pt.lowestPricePerSession
+                    ? `${Number(pt.lowestPricePerSession).toLocaleString("vi-VN")}₫ / buổi`
+                    : "Giá: liên hệ";
+
+                  return (
+                    <article
+                      key={pt._id}
+                      className="group mx-auto w-full max-w-sm bg-white rounded-3xl border border-orange-100 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 overflow-hidden animate-card-fade-up"
+                      style={{ animationDelay: `${index * 60}ms` }}
+                    >
+                      {/* COVER IMAGE */}
+                      <div className="relative">
+                        <img
+                          src={
+                            pt.coverImage ||
+                            pt.userInfo?.avatar ||
+                            "https://placehold.co/600x360"
+                          }
+                          alt={pt.userInfo?.name}
+                          className="w-full h-44 object-cover object-top transition-transform duration-500 group-hover:scale-105"
+                        />
+
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+                        {/* BADGES */}
+                        {pt.availableForNewClients && (
+                          <span className="absolute top-3 left-3 rounded-full bg-white/95 px-2.5 py-1 text-[11px] font-semibold text-emerald-600 shadow-sm">
+                            Nhận học viên mới
+                          </span>
+                        )}
+
+                        {pt.verified && (
+                          <span className="absolute top-3 right-3 rounded-full bg-orange-500 text-white px-2.5 py-1 text-[11px] font-semibold shadow">
+                            Verified
+                          </span>
+                        )}
+
+                        {/* AVATAR */}
+                        <div className="absolute -bottom-7 left-4 h-20 w-20 rounded-full border-3 border-white overflow-hidden shadow-lg bg-slate-200">
+                          <img
+                            src={
+                              pt.userInfo?.avatar ||
+                              pt.coverImage ||
+                              "https://placehold.co/120x120"
+                            }
+                            alt="avatar"
+                            className="h-full w-full object-cover object-top"
+                          />
                         </div>
-                      )}
-                    </div>
-
-                    <div className="p-5 flex flex-col justify-between min-h-[190px]">
-                      <div className="space-y-1.5">
-                        <h3 className="text-lg font-semibold text-slate-900 truncate">
-                          {pt.userInfo?.name || "Unnamed Trainer"}
-                        </h3>
-
-                        <p className="text-xs text-slate-500">
-                          📧 {pt.userInfo?.email || "N/A"}
-                          <br />
-                          📞 {pt.userInfo?.phone || "N/A"}
-                        </p>
-
-                        <p className="text-sm text-slate-600 mt-1.5 line-clamp-2">
-                          {pt.bio ||
-                            (pt.specialties?.length
-                              ? `Specialized in ${pt.specialties
-                                  .slice(0, 3)
-                                  .join(", ")}`
-                              : "This trainer has not added a bio yet.")}
-                        </p>
                       </div>
 
-                      <div className="mt-4 flex items-center justify-between gap-3">
-                        <div className="flex flex-col gap-1">
-                          <span className="inline-flex items-center gap-1 rounded-full bg-orange-50 text-[11px] font-semibold text-orange-600 px-2 py-1">
-                            ⭐ Top Rated Match
-                          </span>
-                          {selectedMode && (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-slate-50 text-[11px] text-slate-600 px-2 py-1">
-                              📍 Mode: {selectedMode}
-                            </span>
-                          )}
+                      {/* CONTENT */}
+                      <div className="pt-10 pb-4 px-4 flex flex-col justify-between min-h-[200px]">
+                        <div>
+                          {/* Name + exp */}
+                          <div className="flex items-start justify-between gap-3">
+                            <div>
+                              <h3 className="text-base font-semibold text-slate-900 truncate">
+                                {pt.userInfo?.name || "Unnamed Trainer"}
+                              </h3>
+                              <p className="text-xs text-slate-500 mt-0.5">
+                                {pt.yearsExperience
+                                  ? `${pt.yearsExperience}+ năm kinh nghiệm`
+                                  : "PT cá nhân"}
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Rating */}
+                          <div className="mt-2 flex items-center gap-2 text-xs">
+                            <div className="flex">
+                              {Array.from({ length: 5 }).map((_, i) => (
+                                <span
+                                  key={i}
+                                  className={
+                                    i < ratingRounded ? "text-amber-400" : "text-slate-300"
+                                  }
+                                >
+                                  ★
+                                </span>
+                              ))}
+                            </div>
+
+                            {ratingCount > 0 ? (
+                              <span className="text-slate-500">
+                                {rating.toFixed(1)} · {ratingCount} đánh giá
+                              </span>
+                            ) : (
+                              <span className="text-slate-400 italic">
+                                Chưa có đánh giá
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Gym + Price */}
+                          <p className="mt-2 text-xs text-slate-600 line-clamp-2">
+                            📍 {pt.primaryGym?.name || "Khu vực linh hoạt"}
+                          </p>
+
+                          <p className="mt-1 text-sm font-semibold text-orange-600">
+                            {priceText}
+                          </p>
+
+                          {/* Tags */}
+                          <div className="mt-2 flex flex-wrap gap-1.5">
+                            {pt.specialties?.slice(0, 2).map((s) => (
+                              <span
+                                key={s}
+                                className="inline-flex items-center rounded-full bg-orange-50 text-[11px] text-orange-700 px-2 py-0.5"
+                              >
+                                {PackageTagLabels[s] || s}
+                              </span>
+                            ))}
+
+                            {modes.slice(0, 2).map((m) => (
+                              <span
+                                key={m}
+                                className="inline-flex items-center rounded-full bg-slate-50 text-[11px] text-slate-600 px-2 py-0.5"
+                              >
+                                {modeLabels[m]}
+                              </span>
+                            ))}
+                          </div>
                         </div>
 
+                        {/* Button */}
                         <button
-                          onClick={() =>
-                            navigate(`/pt/${pt.userInfo?._id}`)
-                          }
-                          className="inline-flex items-center justify-center bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-full px-4 py-2 text-xs md:text-sm shadow-md shadow-orange-500/30 transition-all hover:-translate-y-0.5"
+                          onClick={() => navigate(`/pt/${pt.userInfo?._id}`)}
+                          className="mt-4 w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-full py-2.5 text-sm shadow-md hover:shadow-lg transition-all"
                         >
-                          View Details
+                          View details
                         </button>
                       </div>
-                    </div>
-                  </article>
-                ))}
+                    </article>
+                  );
+                })}
               </div>
-            )}
-          </section>
-        </div>
 
-        {/* small inline keyframes for fade-in cards */}
-        <style>{`
-          @keyframes fadeInUp {
-            from {
-              opacity: 0;
-              transform: translate3d(0, 14px, 0);
-            }
-            to {
-              opacity: 1;
-              transform: translate3d(0, 0, 0);
-            }
-          }
-        `}</style>
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="mt-8 flex items-center justify-center gap-3 text-xs md:text-sm">
+                  <button
+                    disabled={page === 1}
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    className="px-3 py-1.5 rounded-full border border-slate-200 bg-white text-slate-600 disabled:opacity-40 hover:border-orange-400 hover:text-orange-600 transition-colors"
+                  >
+                    ← Prev
+                  </button>
+                  <span className="text-slate-500">
+                    Page <span className="font-semibold">{page}</span> /{" "}
+                    <span className="font-semibold">{totalPages}</span>
+                  </span>
+                  <button
+                    disabled={page === totalPages}
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    className="px-3 py-1.5 rounded-full border border-slate-200 bg-white text-slate-600 disabled:opacity-40 hover:border-orange-400 hover:text-orange-600 transition-colors"
+                  >
+                    Next →
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+        </div>
       </div>
     </MainLayout>
   );
