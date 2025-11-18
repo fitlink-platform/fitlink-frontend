@@ -25,7 +25,7 @@ const slides = [
     primaryCta: "Find Your Coach",
     secondaryCta: "Talk to a PT",
     image:
-      "https://images.unsplash.com/photo-1571907480495-3b4bff7b5b4a?q=80&w=1400&auto=format&fit=crop",
+      "/poster2.jpg",
     badge: "Nutrition + Workout",
     tag: "Science-based coaching",
   },
