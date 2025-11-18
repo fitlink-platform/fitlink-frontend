@@ -52,6 +52,7 @@ main::-webkit-scrollbar-thumb {
   background: none !important;
   border: none !important;
   display: none !important;
+}
 
 
 @keyframes card-fade-up {
@@ -67,5 +68,4 @@ main::-webkit-scrollbar-thumb {
 
 .animate-card-fade-up {
   animation: card-fade-up 0.35s ease-out forwards;
-
 }
