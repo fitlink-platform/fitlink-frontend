@@ -12,14 +12,20 @@ const ChatWindow = ({ self, peer, role }) => {
   const messagesEndRef = useRef(null);
   const typingTimer = useRef(null);
   const prevLength = useRef(0);
+  const messagesContainerRef = useRef(null);
 
-  // auto scroll
+  // auto scroll to bottom on new message
   useEffect(() => {
-    if (messages.length > prevLength.current) {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messages.length > prevLength.current && messagesContainerRef.current) {
+      const el = messagesContainerRef.current;
+      el.scrollTo({
+        top: el.scrollHeight,
+        behavior: "smooth",
+      });
     }
     prevLength.current = messages.length;
   }, [messages]);
+
 
   // join room + listeners
   useEffect(() => {
@@ -95,7 +101,9 @@ const ChatWindow = ({ self, peer, role }) => {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2 bg-gray-50">
+      <div
+        ref={messagesContainerRef}
+        className="flex-1 overflow-y-auto px-4 py-3 space-y-2 bg-gray-50">
         {messages.map((msg, idx) => {
           const senderId = msg.sender?._id || msg.sender || msg.senderId;
           const mine = String(senderId) === String(self._id);
@@ -105,11 +113,10 @@ const ChatWindow = ({ self, peer, role }) => {
               className={`flex ${mine ? "justify-end" : "justify-start"}`}
             >
               <div
-                className={`px-4 py-2 rounded-2xl max-w-[70%] text-sm shadow-sm ${
-                  mine
+                className={`px-4 py-2 rounded-2xl max-w-[70%] text-sm shadow-sm ${mine
                     ? "bg-blue-500 text-white rounded-br-none"
                     : "bg-gray-200 text-gray-800 rounded-bl-none"
-                }`}
+                  }`}
               >
                 {msg.text}
               </div>

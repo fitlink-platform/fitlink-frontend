@@ -98,7 +98,7 @@ export default function LoginPage() {
           {/* Left image section */}
           <div className="relative hidden md:block bg-[#111]">
             <img
-              src="/as/fitness-login.jpg"
+              src="/poster.jpg"
               alt="Gym"
               className="absolute inset-0 w-full h-full object-cover opacity-60"
             />
