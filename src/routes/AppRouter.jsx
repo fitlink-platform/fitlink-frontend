@@ -47,6 +47,7 @@ import PTFeedback from "~/pages/pt/PTFeedbackPage";
 import PTApprovalPage from "~/pages/pt/PTApprovalPage";
 import MyPackage from "~/components/MyPackage";
 import Transactions from "~/pages/admin/Transactions";
+import StudentDashboard from "~/pages/student/StudentDashboard";
 export default function AppRouter() {
   return (
     <Routes>
@@ -225,6 +226,7 @@ export default function AppRouter() {
       />
       <Route path="/pt/approval-request" element={<PTApprovalPage />} />
       <Route path="/chat" element={<MessagePage />} />
+      <Route path="/student/dashboard" element={<StudentDashboard />} />
     </Routes>
   );
 }
