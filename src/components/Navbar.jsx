@@ -122,6 +122,15 @@ export default function Navbar() {
           {isProfileOpen && (
             <div className="absolute right-0 top-full mt-2 w-56 bg-white border rounded-lg shadow-xl text-gray-700 z-[9999]">
               <ul className="py-1">
+                 <li
+        className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+        onClick={() => {
+          navigate('/student/dashboard')
+          setIsProfileOpen(false)
+        }}
+      >
+        Dashboard
+      </li>
                 <li
                   className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                   onClick={() => {
