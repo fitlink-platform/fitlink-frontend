@@ -32,3 +32,8 @@ export async function getStudentDashboard() {
   const res = await axiosClient.get(`/student-stats/dashboard`);
   return res.data || {};
 }
+
+export async function getStudentBMIHistory() {
+  const res = await axiosClient.get("/student/bmi/history");
+  return res.data || [];
+}
