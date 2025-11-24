@@ -9,12 +9,14 @@ import {
   getStudentProgressStats,
   getStudentSessionHistory,
   getStudentSessionHistoryFull,
+  getStudentBMIHistory,
 } from "~/services/studentStatsService";
 
 import PaymentHistoryChart from "~/components/student-charts/PaymentHistoryChart";
 import StudentCompletedChart from "~/components/student-charts/StudentCompletedChart";
 import StudentProgressChart from "~/components/student-charts/StudentProgressChart";
 import StudentSessionsHistoryChart from "~/components/student-charts/StudentSessionsHistoryChart";
+import StudentBMIChart from "~/components/student-charts/StudentBMIChart";
 
 /* =========================================================
    UI WRAPPERS
@@ -51,6 +53,7 @@ export default function StudentDashboard() {
   const [completedStats, setCompletedStats] = useState(Array(12).fill(0));
   const [progressStats, setProgressStats] = useState(Array(12).fill(0));
   const [historyStats, setHistoryStats] = useState(Array(12).fill(0));
+   const [bmiHistory, setBmiHistory] = useState([]);
 
   const year = new Date().getFullYear();
 
@@ -81,6 +84,24 @@ export default function StudentDashboard() {
     setSessions(sessions || []);
   };
 
+ const fetchBMIHistory = async () => {
+  const raw = await getStudentBMIHistory();   // <--- raw ở đây
+  if (!raw) {
+    setBmiHistory([]);
+    return;
+  }
+
+  const formatted = raw.map((item) => ({
+    bmi: item.bmi,
+    date: new Date(item.session?.startTime).toLocaleDateString("vi-VN", {
+      day: "2-digit",
+      month: "2-digit",
+    }),
+  }));
+
+  setBmiHistory(formatted);
+};
+
   /* LOAD ON MOUNT */
   useEffect(() => {
     fetchPayment();
@@ -88,6 +109,7 @@ export default function StudentDashboard() {
     fetchProgress();
     fetchSessionHistory();
     fetchRecentSessions();
+    fetchBMIHistory();
   }, []);
 
   /* =========================================================
@@ -187,7 +209,12 @@ export default function StudentDashboard() {
           <SectionCard title="Session History (12 months)">
             <StudentSessionsHistoryChart data={historyStats} />
           </SectionCard>
-
+          
+          <SectionCard title="BMI History (Per Session)">
+  <div className="w-full h-64">
+    <StudentBMIChart data={bmiHistory} />
+  </div>
+</SectionCard>
         </div>
       </div>
     </MainLayout>

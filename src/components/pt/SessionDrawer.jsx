@@ -2,16 +2,16 @@
 import { useEffect, useState } from "react";
 import { FaTimes } from "react-icons/fa";
 import { toast } from "react-toastify";
-import { deleteSession, updateSessionStatus } from "~/services/sessionService"; // ✅ chỉ giữ 2 hàm thật sự dùng
+import { deleteSession, updateSessionStatus } from "~/services/sessionService"; // chỉ giữ 2 hàm thật sự dùng
 
 export default function SessionDrawer({ open, onClose, eventData, onChanged }) {
   const [loading, setLoading] = useState(false);
   const session = eventData?.session;
 
-  // ✅ State lưu PT Note
+  // State lưu PT Note
   const [ptNote, setPtNote] = useState(session?.ptNote || "");
 
-  // ✅ Khi đổi session → cập nhật lại note
+  // Khi đổi session → cập nhật lại note
   useEffect(() => {
     setPtNote(session?.ptNote || "");
   }, [session]);
@@ -41,7 +41,7 @@ export default function SessionDrawer({ open, onClose, eventData, onChanged }) {
       })
     : "—";
 
-  // ✅ FIX CHÍNH: chỉ dùng 1 API updateSessionStatus
+  // FIX CHÍNH: chỉ dùng 1 API updateSessionStatus
   const setStatus = async (status, attendance) => {
     if (!session?._id) return;
     try {
@@ -49,7 +49,7 @@ export default function SessionDrawer({ open, onClose, eventData, onChanged }) {
       await updateSessionStatus(session._id, {
         ...(status ? { status } : {}),
         ...(attendance ? { attendance } : {}),
-        ptNote: ptNote || "", // ✅ gửi kèm ghi chú
+        ptNote: ptNote || "", // gửi kèm ghi chú
       });
       toast.success("Đã lưu thay đổi");
       onChanged?.();
@@ -76,7 +76,7 @@ export default function SessionDrawer({ open, onClose, eventData, onChanged }) {
     }
   };
 
-  // ✅ Thêm hàm lưu riêng PT Note khi blur
+  // Thêm hàm lưu riêng PT Note khi blur
   const saveNote = async () => {
     if (!session?._id) return;
     try {
@@ -185,13 +185,13 @@ export default function SessionDrawer({ open, onClose, eventData, onChanged }) {
             </div>
           </div>
 
-          {/* ✅ FIX: Thêm onBlur để auto-save PT Note */}
+          {/* FIX: Thêm onBlur để auto-save PT Note */}
           <div className="rounded-xl border border-white/10 bg-white/5 p-3">
             <label className="block text-sm text-gray-300 mb-1">PT Note</label>
             <textarea
               value={ptNote}
               onChange={(e) => setPtNote(e.target.value)}
-              onBlur={saveNote} // ✅ auto-save khi rời ô
+              onBlur={saveNote} // auto-save khi rời ô
               placeholder="Enter your note here..."
               className="w-full rounded-md bg-black/20 border border-white/10 p-2 text-sm text-white"
               rows={3}

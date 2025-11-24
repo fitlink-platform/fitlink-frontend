@@ -1,11 +1,12 @@
 import { Link } from "react-router-dom";
-import { FaUsers, FaCalendarAlt, FaWallet, FaChartPie } from "react-icons/fa";
+import { FaUsers, FaCalendarAlt, FaWallet, FaChartPie, FaStar } from "react-icons/fa";
 import PTMainLayout from "~/layouts/pt/PTMainLayout";
 import { getMyWallet } from "~/services/ptWalletService";
 import { getPTDashboardStats } from "~/services/ptDashboardService";
 import { listMyStudents } from "~/services/ptStudentService";
 import { getMySessions } from "~/services/sessionService";
 import { useEffect, useState } from "react";
+import axiosClient from "~/api/axiosClient";
 
 import RevenueChart from "~/components/pt-charts/RevenueChart";
 import UserStatsChart from "~/components/pt-charts/UserStatsChart";
@@ -243,6 +244,10 @@ export default function PTDashboard() {
   /* NEW */
   const [completedStats, setCompletedStats] = useState(Array(12).fill(0));
   const [cancelStats, setCancelStats] = useState(Array(12).fill(0));
+  const [rating, setRating] = useState({
+  averageRating: 0,
+  totalReviews: 0
+});
 
   const fetchWallet = async () => {
     const data = await getMyWallet();
@@ -292,12 +297,21 @@ export default function PTDashboard() {
 
     setSessions(up);
   };
+  const fetchRating = async () => {
+  const res = await axiosClient.get("/pt/stats/rating");
+  setRating({
+    averageRating: res.data?.averageRating || 0,
+    totalReviews: res.data?.totalReviews || 0
+  });
+};
+
 
   useEffect(() => {
     fetchWallet();
     fetchStats();
     fetchStudents();
     fetchSessions();
+    fetchRating();
   }, []);
   /* ===================== LOAD BIỂU ĐỒ — 4 loại ===================== */
   useEffect(() => {
@@ -305,8 +319,8 @@ export default function PTDashboard() {
       try {
         const rev = await getPTRevenueStats(year);
         const usr = await getPTStudentStats(year);
-       const comp = await getPTCompletedSessionStats(year);
-const canc = await getPTCancelRateStats(year);
+        const comp = await getPTCompletedSessionStats(year);
+        const canc = await getPTCancelRateStats(year);
 
         setRevenueStats(rev || Array(12).fill(0));
         setUserJoinStats(usr || Array(12).fill(0));
@@ -355,6 +369,7 @@ const canc = await getPTCancelRateStats(year);
         >
           <FaWallet />
         </StatCard>
+
       </div>
 
       {/* MIDDLE GRID */}
@@ -366,6 +381,13 @@ const canc = await getPTCancelRateStats(year);
 
         <div className="space-y-6">
           <StudentsMini students={students} />
+          <SectionCard title="Rating">
+        <div className="flex items-center gap-3">
+          <p className="text-3xl font-bold text-orange-400">{rating.averageRating}</p>
+        <FaStar className="text-yellow-400 text-2xl" />
+        </div>
+          <p className="text-sm text-gray-400 mt-1">{rating.totalReviews} reviews</p>
+          </SectionCard>
 
           <SectionCard title="Free plan limit">
             <p className="text-sm text-gray-200">
